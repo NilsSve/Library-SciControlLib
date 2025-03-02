@@ -1,4 +1,4 @@
-//
+ï»¿//
 // File: cSciLexer.pkg
 // Author: Wil van Antwerpen
 // Date: March 2017
@@ -849,22 +849,20 @@ Class cSciLexer is a DFControl // cUIObject  cObject
     Boolean bIsUtf8
     Boolean bIsOem
     
-    Move eTE_Unknown to iEncoding //0
+    Move eTE_Unknown to iEncoding   //0
     Get pbUtf8Mode To bIsUtf8
     Get EditorMessage SCI_GETCODEPAGE to iCodePage
     If (bIsUtf8) Begin
-      Move eTE_UTF8 to iEncoding //1
+      Move eTE_UTF8 to iEncoding    //1
     End
     Else Begin
-      //If (iCodePage=0) Begin
       Get pbOemMode To bIsOem
       If (bIsOem) Begin
-        Move eTE_OEM to iEncoding //2
+        Move eTE_OEM to iEncoding   //2
       End
       Else Begin
-        Move eTE_ANSI to iEncoding //3
+        Move eTE_ANSI to iEncoding  //3
       End
-      //End
     End
     Function_Return iEncoding
   End_Function
@@ -948,13 +946,14 @@ Class cSciLexer is a DFControl // cUIObject  cObject
             (TextData[0] = C_BOM_UTF8c1    and TextData[1] = C_BOM_UTF8c2 and TextData[2] = C_BOM_UTF8c3) or ;
             (TextData[0] = C_BOM_UTF16LEc1 and TextData[1] = C_BOM_UTF16LEc2))) to bHasBom
       If (bHasBom) Begin
-        Set pbHasUtf8BOM To True
-        If (pbUtf8Mode(Self)=false) Begin
+        Set pbHasUtf8BOM to True
+          // If more than one scintilla editor in use, we need to set these uncondictionally!
+//        If (pbUtf8Mode(Self)=false) Begin
           Set pbUtf8Mode      to True
           Set pbOemMode       to False
           Send EditorMessage SCI_SETCODEPAGE SC_CP_UTF8
           Send EditorMessage SCI_STYLESETCHARACTERSET STYLE_DEFAULT SC_CHARSET_ANSI
-        End
+//        End 
       End 
 
       Move 0 To TextData[SizeOfArray(TextData)]  // add a zero at the end
@@ -2695,7 +2694,7 @@ Class cSciLexer is a DFControl // cUIObject  cObject
   //        Function_Return (CM_GetSplitterPos(Self,False) Ne 0)
   //    End_Function
   //        // Is a special usage for the splitter window.
-  //        // gr”Œen werden immer angepasst!
+  //        // grÃ¶Ã®en werden immer angepasst!
   //    Procedure DuplicateWindow
   //        If not (isSplittedHorizonztal(Self))     Send SplitWindowHorizontal
   //        Else If not (isSplittedVertical(Self))   Send SplitWindowVertical
