@@ -948,7 +948,7 @@ Class cSciLexer is a DFControl // cUIObject  cObject
       If (bHasBom) Begin
         Set pbHasUtf8BOM to True
           // If more than one scintilla editor is in use, we need to set these uncondicionally!
-//        If (pbUtf8Mode(Self)=false) Begin
+//        If (pbUtf8Mode(Self)=False) Begin
           Set pbUtf8Mode      to True
           Set pbOemMode       to False
           Send EditorMessage SCI_SETCODEPAGE SC_CP_UTF8
