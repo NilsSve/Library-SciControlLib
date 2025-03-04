@@ -948,12 +948,12 @@ Class cSciLexer is a DFControl // cUIObject  cObject
       If (bHasBom) Begin
         Set pbHasUtf8BOM to True
           // ToDo: If more than one scintilla editor is in use, we need to set these uncondicionally!
-//        If (pbUtf8Mode(Self)=False) Begin
+        If (pbUtf8Mode(Self)=False) Begin
           Set pbUtf8Mode      to True
           Set pbOemMode       to False
           Send EditorMessage SCI_SETCODEPAGE SC_CP_UTF8
           Send EditorMessage SCI_STYLESETCHARACTERSET STYLE_DEFAULT SC_CHARSET_ANSI
-//        End 
+        End 
       End 
 
       Move 0 To TextData[SizeOfArray(TextData)]  // add a zero at the end
