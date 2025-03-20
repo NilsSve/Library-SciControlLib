@@ -1272,6 +1272,25 @@ Class cSciLexer is a DFControl // cUIObject  cObject
     End
   End_Procedure
 
+  Function DetectBOMinEditorBuffer Pointer aTextData Returns Boolean
+      Boolean bHasBOM
+      Boolean bOk
+      Integer iTextLength
+      UChar[] ucaText
+      
+      Move False to bHasBOM
+      Move (CStringSize(aTextData)) to iTextLength
+      If (iTextLength>3) Begin
+          Move (ResizeArray(ucaText,10))  to ucaText // 10 characters is a plenty
+          Move (memcopy(AddressOf(ucaText), aTextData, 3)) to bOk
+          Move (SizeOfArray(ucaText) >= 3 and ( ;
+              (ucaText[0] = C_BOM_UTF8c1    and ucaText[1] = C_BOM_UTF8c2 and ucaText[2] = C_BOM_UTF8c3) or ;
+              (ucaText[0] = C_BOM_UTF16LEc1 and ucaText[1] = C_BOM_UTF16LEc2))) to bHasBom
+      End
+      
+      Function_Return bHasBOM
+  End_Function
+
   // An application sends CMM_SAVEFILE to save the buffer contents to a specific file.
   // bClearUndo
   // If TRUE, the undo buffer is cleared if the file is successfully saved.
@@ -1284,7 +1303,8 @@ Class cSciLexer is a DFControl // cUIObject  cObject
     Integer iResult
     Pointer aTextData
     Integer iTextLength
-
+    Boolean bHasBOM
+    
     Send Cursor_Wait Of Cursor_Control
     If (pbNormalizeLineEndings(Self)) Begin
       Send EditorMessage SCI_CONVERTEOLS SC_EOL_CRLF
@@ -1296,7 +1316,6 @@ Class cSciLexer is a DFControl // cUIObject  cObject
     Get EditorMessage SCI_GETCHARACTERPOINTER to aTextData
     Move (CStringSize(aTextData)) to iTextLength
     If (iTextLength>=0) Begin
-
       Get Seq_New_Channel to iChannel
       If (iChannel=DF_SEQ_CHANNEL_NOT_AVAILABLE) Begin
         Error DFERR_PROGRAM "No Channel Available for saving file"
@@ -1305,27 +1324,52 @@ Class cSciLexer is a DFControl // cUIObject  cObject
       End
 
       Direct_Output Channel iChannel szFileName
-      Send WriteBOM iChannel
+      Get DetectBOMinEditorBuffer aTextData to bHasBOM
+
+      If (bHasBOM=False) Begin
+          Send WriteBOM iChannel // check if we need to add a BOM to the file being written out
+      End
       While ((iPosition+iBlockSize)<iTextLength)
         Send WriteBlock iChannel aTextData iPosition iBlockSize
-
-        Move (iPosition+iBlockSize) To iPosition
+        Move (iPosition+iBlockSize) to iPosition
       Loop
+
       If (iPosition<iTextLength) Begin
         Send WriteBlock iChannel aTextData iPosition (iTextLength-iPosition)
       End
-      Close_Output Channel iChannel
-      Send Seq_Release_Channel iChannel
 
+      Close_Output channel iChannel
+      Send Seq_Release_Channel iChannel
       If (bClearUndo) Begin
         Send EditorMessage SCI_SETSAVEPOINT
       End
-
-      Move CME_SUCCESS To iResult
+      Move CME_SUCCESS to iResult
     End
     Send EditorMessage SCI_SETREADONLY 0
     Send Cursor_Ready of Cursor_Control
     Function_Return iResult
+    
+//      Send WriteBOM iChannel
+//      While ((iPosition+iBlockSize)<iTextLength)
+//        Send WriteBlock iChannel aTextData iPosition iBlockSize
+//
+//        Move (iPosition+iBlockSize) To iPosition
+//      Loop
+//      If (iPosition<iTextLength) Begin
+//        Send WriteBlock iChannel aTextData iPosition (iTextLength-iPosition)
+//      End
+//      Close_Output Channel iChannel
+//      Send Seq_Release_Channel iChannel
+//
+//      If (bClearUndo) Begin
+//        Send EditorMessage SCI_SETSAVEPOINT
+//      End
+//
+//      Move CME_SUCCESS To iResult
+//    End
+//    Send EditorMessage SCI_SETREADONLY 0
+//    Send Cursor_Ready of Cursor_Control
+//    Function_Return iResult
   End_Function
 
   // This returns the number of lines in the document.
