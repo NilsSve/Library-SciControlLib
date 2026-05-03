@@ -1315,7 +1315,10 @@ Class cSciLexer is a DFControl // cUIObject  cObject
     Send EditorMessage SCI_SETREADONLY 1
     Get EditorMessage SCI_GETCHARACTERPOINTER to aTextData
     Move (CStringSize(aTextData)) to iTextLength
-    If (iTextLength>=0) Begin
+    If (iTextLength = 0) Begin
+        Function_Return 1
+    End
+    Else Begin
       Get Seq_New_Channel to iChannel
       If (iChannel=DF_SEQ_CHANNEL_NOT_AVAILABLE) Begin
         Error DFERR_PROGRAM "No Channel Available for saving file"
