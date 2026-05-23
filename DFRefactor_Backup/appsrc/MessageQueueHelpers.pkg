@@ -27,17 +27,17 @@ Define PM_REMOVE For 1
 // dll-function and msg-type needed for removing posted messages from the message queue
 // 28.1.2003 BP
 Struct tMSG
-    Handle   hwnd     //as Handle
-    Integer  message  //as Integer
+  Handle   hwnd     //as Handle
+  Integer  message  //as Integer
 #IFDEF IS$WIN64
     Integer tMSGMissingAlignment
 #ENDIF
-    Longptr  wParam   //as WPARAM
-    Longptr  lParam   //as LPARAM
-    DWord    Time     //as DWord
-    DWord    ptX      //as DWord
-    DWord    ptY      //as DWord
-    DWord    lPrivate
+  Longptr  wParam   //as WPARAM
+  Longptr  lParam   //as LPARAM
+  DWord    Time     //as DWord
+  DWord    ptX      //as DWord
+  DWord    ptY      //as DWord
+  DWORD    lPrivate
 End_Struct
 
 External_Function TranslateMessage "TranslateMessage" user32.dll Pointer pMsg Returns Integer
@@ -49,38 +49,39 @@ External_Function DispatchMessage  "DispatchMessageW" user32.dll Pointer pMsg Re
 // (a key that combined with the alt-keyboard key)
 //
 Procedure DispatchHotkey
-    Integer iPendingMessage
-    Integer iVoid iTranslated
-    tMSG    WinMsg
+  Integer iPendingMessage
+  Integer iVoid iTranslated
+  tMSG    WinMsg
 
-    Move 0 to WinMsg.ptX
-    If (PeekMessage(AddressOf(WinMsg), 0, 0, 0, PM_REMOVE)) Begin
-        Move WinMsg.message to iPendingMessage
-        If (iPendingMessage = WM_HOTKEY) Begin
-            Move (TranslateMessage(AddressOf(WinMsg))) to iTranslated
-            If (iTranslated) Begin
-                Move (DispatchMessage(AddressOf(WinMsg)))  to iVoid
-            End
-        End
+  Move 0 To WinMsg.ptX
+  If (PeekMessage(AddressOf(WinMsg), 0, 0, 0, PM_REMOVE)) Begin
+    Move WinMsg.message To iPendingMessage
+    If (iPendingMessage = WM_HOTKEY) Begin
+      Move (TranslateMessage(AddressOf(WinMsg))) To iTranslated
+      If (iTranslated) Begin
+        Move (DispatchMessage(AddressOf(WinMsg)))  To iVoid
+      End
     End
+  End
 End_Procedure
 
 //
 // Dispatches ANY key press from the loop, not just one, but all of them
 //
 Procedure DispatchAnyKey
-    Integer iPendingMessage
-    Integer iVoid iTranslated
-    tMSG    WinMsg
+  Integer iPendingMessage
+  Integer iVoid iTranslated
+  tMSG    WinMsg
 
-    Move 0 to WinMsg.ptX
-    If (PeekMessage(AddressOf(WinMsg), 0, 0, 0, PM_REMOVE)) Begin
-        Move WinMsg.message to iPendingMessage
-        If (iPendingMessage = WM_HOTKEY or iPendingMessage = WM_KEYDOWN or iPendingMessage = WM_KEYUP) Begin
-            Move (TranslateMessage(AddressOf(WinMsg))) to iTranslated
-            If (iTranslated) Begin
-                Move (DispatchMessage(AddressOf(WinMsg)))  to iVoid
-            End
-        End
+  Move 0 To WinMsg.ptX
+  If (PeekMessage(AddressOf(WinMsg), 0, 0, 0, PM_REMOVE)) Begin
+    Move WinMsg.message To iPendingMessage
+    If (iPendingMessage = WM_HOTKEY or iPendingMessage = WM_KEYDOWN or iPendingMessage = WM_KEYUP) Begin
+      Move (TranslateMessage(AddressOf(WinMsg))) To iTranslated
+      If (iTranslated) Begin
+        Move (DispatchMessage(AddressOf(WinMsg)))  To iVoid
+      End
     End
+  End
 End_Procedure
+

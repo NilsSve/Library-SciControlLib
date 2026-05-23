@@ -1,0 +1,20 @@
+=====================================================================================
+*** CREATED BY: DFRefactor -- 2026-05-23 10:24:25,764 ***
+
+  Statistics:
+  ===========
+    SWS File: C:\Projects\DF20\Libraries\SciControlLib\SciControlLib25.0.sws
+    File Filter: *.src;*.vw;*.sl;*.dg;*.rv;*.pkg;*.cl;*.wo;*.dd;*.bp;*.inc;*.nui;*.utl;*.mn;*.mnu
+    Files: 27
+    Folders: 1
+    C:\Projects\DF20\Libraries\SciControlLib\AppSrc
+
+    Selected Functions: 2
+
+Function Type: eEditorFunction - One File(s):
+- 27 file(s) Changed: Proper Upper and lowercasing EditorNormalizeCase
+- 27 file(s) Reindented code EditorReIndent
+
+Total number of files changed: 27 out of 27 Files.
+Process completed without errors. Elapsed Time: 00:00:06.568
+

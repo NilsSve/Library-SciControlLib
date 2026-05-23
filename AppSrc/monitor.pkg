@@ -19,17 +19,17 @@ Use Set.pkg
 //} MONITORINFO, *LPMONITORINFO;
 
 Struct tRECT
-  Integer Left
-  Integer Top
-  Integer Right
-  Integer Bottom
+    Integer Left
+    Integer Top
+    Integer Right
+    Integer Bottom
 End_Struct
 
 Struct tMONITORINFO
-  DWord cbSize
-  tRECT rcMonitor
-  tRECT rcWork
-  DWord dwFlags
+    DWord cbSize
+    tRECT rcMonitor
+    tRECT rcWork
+    DWord dwFlags
 End_Struct
 
 //HMONITOR MonitorFromWindow(
@@ -67,89 +67,89 @@ End_Object
 //  monitor handles in a set for use later
 
 Procedure EnumerateMonitors
-  tMONITORINFO tPrimary
-  Handle hMonitor
-  Boolean bRetVal
+    tMONITORINFO tPrimary
+    Handle hMonitor
+    Boolean bRetVal
 
-  Move (MonitorFromPoint(0,0,MONITOR_DEFAULTONPRIMARY)) To hMonitor
-  Set Value Of oMonitorHandles Item 0 To hMonitor
-  Move (SizeofType(tMONITORINFO)) To tPrimary.cbSize
-  Move (GetMonitorInfo(hMonitor, AddressOf(tPrimary))) To bRetVal
-  //
-  Move (MonitorFromPoint(-1,0,MONITOR_DEFAULTONNULL)) To hMonitor
-  If (hMonitor<>0) ;
-    Send add_element Of oMonitorHandles hMonitor
-  //
-  Move (MonitorFromPoint(-1,-1,MONITOR_DEFAULTONNULL)) To hMonitor
-  If (hMonitor<>0) ;
-    Send add_element Of oMonitorHandles hMonitor
-  //
-  Move (MonitorFromPoint(0,-1,MONITOR_DEFAULTONNULL)) To hMonitor
-  If (hMonitor<>0) ;
-    Send add_element Of oMonitorHandles hMonitor
-  //
-  Move (MonitorFromPoint(tPrimary.rcMonitor.Right+1,-1,MONITOR_DEFAULTONNULL)) To hMonitor
-  If (hMonitor<>0) ;
-    Send add_element Of oMonitorHandles hMonitor
-  //
-  Move (MonitorFromPoint(tPrimary.rcMonitor.Right+1,0,MONITOR_DEFAULTONNULL)) To hMonitor
-  If (hMonitor<>0) ;
-    Send add_element Of oMonitorHandles hMonitor
-  //
-  Move (MonitorFromPoint(tPrimary.rcMonitor.Right+1,tPrimary.rcMonitor.Bottom+1,MONITOR_DEFAULTONNULL)) To hMonitor
-  If (hMonitor<>0) ;
-    Send add_element Of oMonitorHandles hMonitor
-  //
-  Move (MonitorFromPoint(tPrimary.rcMonitor.Right,tPrimary.rcMonitor.Bottom+1,MONITOR_DEFAULTONNULL)) To hMonitor
-  If (hMonitor<>0) ;
-    Send add_element Of oMonitorHandles hMonitor
-  //
-  Move (MonitorFromPoint(0,tPrimary.rcMonitor.Bottom+1,MONITOR_DEFAULTONNULL)) To hMonitor
-  If (hMonitor<>0) ;
-    Send add_element Of oMonitorHandles hMonitor
-  //
-  Move (MonitorFromPoint(-1,tPrimary.rcMonitor.Bottom+1,MONITOR_DEFAULTONNULL)) To hMonitor
-  If (hMonitor<>0) ;
-    Send add_element Of oMonitorHandles hMonitor
+    Move (MonitorFromPoint(0,0,MONITOR_DEFAULTONPRIMARY)) to hMonitor
+    Set Value of oMonitorHandles Item 0 to hMonitor
+    Move (SizeofType(tMONITORINFO)) to tPrimary.cbSize
+    Move (GetMonitorInfo(hMonitor, AddressOf(tPrimary))) to bRetVal
+    //
+    Move (MonitorFromPoint(-1,0,MONITOR_DEFAULTONNULL)) to hMonitor
+    If (hMonitor<>0) ;
+        Send add_element of oMonitorHandles hMonitor
+    //
+    Move (MonitorFromPoint(-1,-1,MONITOR_DEFAULTONNULL)) to hMonitor
+    If (hMonitor<>0) ;
+        Send add_element of oMonitorHandles hMonitor
+    //
+    Move (MonitorFromPoint(0,-1,MONITOR_DEFAULTONNULL)) to hMonitor
+    If (hMonitor<>0) ;
+        Send add_element of oMonitorHandles hMonitor
+    //
+    Move (MonitorFromPoint(tPrimary.rcMonitor.Right+1,-1,MONITOR_DEFAULTONNULL)) to hMonitor
+    If (hMonitor<>0) ;
+        Send add_element of oMonitorHandles hMonitor
+    //
+    Move (MonitorFromPoint(tPrimary.rcMonitor.Right+1,0,MONITOR_DEFAULTONNULL)) to hMonitor
+    If (hMonitor<>0) ;
+        Send add_element of oMonitorHandles hMonitor
+    //
+    Move (MonitorFromPoint(tPrimary.rcMonitor.Right+1,tPrimary.rcMonitor.Bottom+1,MONITOR_DEFAULTONNULL)) to hMonitor
+    If (hMonitor<>0) ;
+        Send add_element of oMonitorHandles hMonitor
+    //
+    Move (MonitorFromPoint(tPrimary.rcMonitor.Right,tPrimary.rcMonitor.Bottom+1,MONITOR_DEFAULTONNULL)) to hMonitor
+    If (hMonitor<>0) ;
+        Send add_element of oMonitorHandles hMonitor
+    //
+    Move (MonitorFromPoint(0,tPrimary.rcMonitor.Bottom+1,MONITOR_DEFAULTONNULL)) to hMonitor
+    If (hMonitor<>0) ;
+        Send add_element of oMonitorHandles hMonitor
+    //
+    Move (MonitorFromPoint(-1,tPrimary.rcMonitor.Bottom+1,MONITOR_DEFAULTONNULL)) to hMonitor
+    If (hMonitor<>0) ;
+        Send add_element of oMonitorHandles hMonitor
 End_Procedure
 
 Send EnumerateMonitors
 
 Procedure DisplayMonitorInfo Handle hWnd
-  tMONITORINFO tMonInfo
-  Boolean bRetVal
-  Integer i iCnt iRetVal
-  Handle hMonitor
+    tMONITORINFO tMonInfo
+    Boolean bRetVal
+    Integer i iCnt iRetVal
+    Handle hMonitor
 
-  Get item_count Of oMonitorHandles To iCnt
-  If (iCnt=0) ;
-    Send EnumerateMonitors
-  //
-  Get item_count Of oMonitorHandles To iCnt
-  For i From 0 To (iCnt-1)
-    Get Value Of oMonitorHandles Item i To hMonitor
-    Move (SizeofType(tMONITORINFO)) To tMonInfo.cbSize
-    Move (GetMonitorInfo(hMonitor, AddressOf(tMonInfo))) To bRetVal
-    If (bRetVal=0) ;
-      Get ShowLastError To iRetVal
-    Showln "Monitor #" i
-    Showln "Top Left: " tMonInfo.rcMonitor.Left ',' tMonInfo.rcMonitor.Top
-    Showln "Bottom Right: " tMonInfo.rcMonitor.Right ',' tMonInfo.rcMonitor.Bottom
-    Showln "Resolution: " (tMonInfo.rcMonitor.Right-tMonInfo.rcMonitor.Left) 'x' (tMonInfo.rcMonitor.Bottom-tMonInfo.rcMonitor.Top)
-    Showln
-  Loop
+    Get item_count of oMonitorHandles to iCnt
+    If (iCnt=0) ;
+        Send EnumerateMonitors
+    //
+    Get item_count of oMonitorHandles to iCnt
+    For i From 0 to (iCnt-1)
+        Get Value of oMonitorHandles Item i to hMonitor
+        Move (SizeofType(tMONITORINFO)) to tMonInfo.cbSize
+        Move (GetMonitorInfo(hMonitor, AddressOf(tMonInfo))) to bRetVal
+        If (bRetVal=0) ;
+            Get ShowLastError to iRetVal
+        Showln "Monitor #" i
+        Showln "Top Left: " tMonInfo.rcMonitor.Left ',' tMonInfo.rcMonitor.Top
+        Showln "Bottom Right: " tMonInfo.rcMonitor.Right ',' tMonInfo.rcMonitor.Bottom
+        Showln "Resolution: " (tMonInfo.rcMonitor.Right-tMonInfo.rcMonitor.Left) 'x' (tMonInfo.rcMonitor.Bottom-tMonInfo.rcMonitor.Top)
+        Showln
+    Loop
 End_Procedure
 
 Function MonitorInfo Handle hWnd Returns tMONITORINFO
-  tMONITORINFO tMonInfo
-  Boolean bRetVal
-  Integer iRetVal
-  Handle hMonitor
+    tMONITORINFO tMonInfo
+    Boolean bRetVal
+    Integer iRetVal
+    Handle hMonitor
 
-  Move (SizeofType(tMONITORINFO)) To tMonInfo.cbSize
-  Move (MonitorFromWindow(hWnd,MONITOR_DEFAULTONPRIMARY)) To hMonitor
-  Move (GetMonitorInfo(hMonitor, AddressOf(tMonInfo))) To bRetVal
-  If (bRetVal=0) ;
-    Get ShowLastError To iRetVal
-  Function_Return tMonInfo
+    Move (SizeofType(tMONITORINFO)) to tMonInfo.cbSize
+    Move (MonitorFromWindow(hWnd,MONITOR_DEFAULTONPRIMARY)) to hMonitor
+    Move (GetMonitorInfo(hMonitor, AddressOf(tMonInfo))) to bRetVal
+    If (bRetVal=0) ;
+        Get ShowLastError to iRetVal
+    Function_Return tMonInfo
 End_Function

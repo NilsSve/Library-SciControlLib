@@ -117,424 +117,424 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
 
 
 
-  // Has the ability to read an write from and to an IniFile.
-  // The main advantage of this class is that it stores all lines
-  // which are not known, so that they arent lost during a save.
+    // Has the ability to read an write from and to an IniFile.
+    // The main advantage of this class is that it stores all lines
+    // which are not known, so that they arent lost during a save.
 
 
-  Class cIniProperties is a Message
-    // Sets all Tag values.
-    Procedure onInit
-    End_Procedure
-    // For termination
-    Procedure INI_AddTagValues
-    End_Procedure
+    Class cIniProperties is a Message
+        // Sets all Tag values.
+        Procedure onInit
+        End_Procedure
+        // For termination
+        Procedure INI_AddTagValues
+        End_Procedure
 
 
-    // Adding properties and setting default values
-    Procedure Construct_Object
-      Forward Send Construct_Object
-      Send Define_cIniProperties
-    End_Procedure
+        // Adding properties and setting default values
+        Procedure Construct_Object
+            Forward Send Construct_Object
+            Send Define_cIniProperties
+        End_Procedure
 
-    Procedure Define_cIniProperties
+        Procedure Define_cIniProperties
 
-      Property String  psSourceFile                   "cConfigManager.Ini" // Name of the inifile.
-      Property String  psSepCharacter                 ","                  // Seperating character.
-      Property Boolean pbUseDataPath                  False //True
-      Property Boolean pbUseProgramPath               True //False
+            Property String  psSourceFile                   "cConfigManager.Ini" // Name of the inifile.
+            Property String  psSepCharacter                 ","                  // Seperating character.
+            Property Boolean pbUseDataPath                  False //True
+            Property Boolean pbUseProgramPath               True //False
 
-      // Data can be stored either global, user specific or
-      // computer specific.
-      // This is reached by adding ComputerName or UserName
-      // to the FileName.
-      Property Integer piLoadSaveMode                        Ini_Global           //[ Ini_User | Ini_Computer | Ini_Global ]
+            // Data can be stored either global, user specific or
+            // computer specific.
+            // This is reached by adding ComputerName or UserName
+            // to the FileName.
+            Property Integer piLoadSaveMode                        Ini_Global           //[ Ini_User | Ini_Computer | Ini_Global ]
 
-      Object oUnusedLines is an Array                 // Storage for all unused (unknown) lines.
-      End_Object
-      Object oLineParser is a cLineParser             // Seperates a String into his parts.
-      End_Object
-
-      Object oTags is a Set                           // Known Tags
-      End_Object
-      Object oTagTypes is an Array                    // Type of the Tags
-      End_Object
-      Object oTagValues is an Array                   // Values for the Tags.
-      End_Object
-      Object oTagConnectedObjects is an Array         // ObjectIDs of the connected Obj.
-      End_Object
-
-      Send INI_AddTagValues
-      Send onInit
-    End_Procedure
-
-    // Connects an Object to a tag.
-    Procedure ConnectObjectToTag String sTag Integer hoID
-      Integer iC
-      Move (Uppercase(sTag))  To sTag
-      Get Find_Element Of (oTags(Self)) sTag  To iC
-      If iC Ge 0 Begin
-        Set Value Of (oTagConnectedObjects(Self)) Item iC   To hoID
-      End
-    End_Procedure
-
-    Procedure Set ConnectObjectValue Integer hoDest String sValue
-      If hoDest Begin
-        If (checkbox_item_state(hoDest,0)) Eq 0 ;
-          Set Value        Of hoDest Item 0 To sValue
-        Else ;
-          Set Select_State Of hoDest Item 0 To sValue
-      End
-    End_Procedure
-    Function ConnectObjectValue Integer hoDest Returns String
-      String sRet
-      If hoDest Begin
-        If (checkbox_item_state(hoDest,0)) Eq 0 ;
-          Move (Value(hoDest,0)) To sRet
-        Else ;
-          Move (Select_State(hoDest,0)) To sRet
-      End
-      Function_Return sRet
-    End_Function
-
-
-
-    // Creates extended source files.
-    Function SourceFile Integer iMode Returns String
-      Integer iPos
-      String  sFile sExt
-      String  sPath
-      
-      Get psSourceFile to sFile
-      If iMode Eq Ini_User     ;
-        Get NetzwerkBenutzer To sExt
-      If iMode Eq Ini_Computer ;
-        Get ComputerName     To sExt
-
-      If (Left(Right(sFile,2),1)) Eq "." ;
-        Move 1                           To iPos
-      If (Left(Right(sFile,3),1)) Eq "." ;
-        Move 2                           To iPos
-      If (Left(Right(sFile,4),1)) Eq "." ;
-        Move 3                           To iPos
-      If iPos Gt 0 ;
-        Move (Insert(sExt,sFile,Length(sFile)-iPos))           To sFile
-      
-      // ToDo: Wouldn't it be better to use psProgrampath?
-      If (sFile<>"") Begin
-        If (sFile<>"" and pbUseDataPath(Self)) Begin
-          Get psDataPath of (phoWorkspace(ghoApplication)) to sPath
-        End
-        Else If (pbUseProgramPath(Self)) Begin
-          Get psProgramPath of (phoWorkspace(ghoApplication)) to sPath
-        End
-        Get vFolderFormat sPath to sPath
-        Move (sPath+sFile) To sFile
-      End
-      Function_Return sFile
-    End_Function
-
-    // Checks if a file exists.
-    Function INI_DoesFileExist String sFile Returns Integer
-      Integer iExist
-      If sFile Eq "" Begin
-        Function_Return 0
-      End
-      Direct_Input sFile
-      If (Not(seqeof)) Move 1 To iExist
-      Close_Input
-      Function_Return iExist
-    End_Function
-
-    // Tries to find the best ini file.
-    Function SourceFileForRead Returns String
-      If (INI_DoesFileExist(Self, SourceFile(Self, piLoadSaveMode(Self)) )) Begin
-        Function_Return (SourceFile(Self, piLoadSaveMode(Self)))
-      End
-      Function_Return (psSourceFile(Self))
-    End_Function
-
-    // Delivers the file for writing.
-    Function SourceFileForWrite Returns String
-      Function_Return (SourceFile(Self, piLoadSaveMode(Self)))
-    End_Function
-
-    // Deletes all items of a Tag, if it is multi!
-    Procedure DeleteAllItems String sTag
-      Integer iC iType hoID iC2 hoTmp
-      Get Find_Element Of (oTags(Self)) sTag      To iC
-      Get Value Of (oTagTypes(Self)) Item iC      To iType
-      Get Value Of (oTagValues(Self)) Item iC     To hoID
-      If iType If hoID Begin
-        For iC2 From 0 To (Item_Count(hoID)-1)
-          Get Value Of hoID Item iC2              To hoTmp
-          If hoTmp ;
-            Send Destroy_Object                     To hoTmp
-        End
-        Send Delete_Data                        To hoID
-      End
-    End_Procedure
-
-    // Deletes one Item of a Tag if it is multi.
-    Procedure DeleteItem String sTag Integer iNr
-      Integer iC iType hoID hoTmp
-      Get Find_Element Of (oTags(Self)) sTag      To iC
-      Get Value Of (oTagTypes(Self)) Item iC      To iType
-      Get Value Of (oTagValues(Self)) Item iC     To hoID
-      If iType If hoID Begin
-        Get Value Of hoID Item iNr              To hoTmp
-        If hoTmp ;
-          Send Destroy_Object            To hoTmp
-        Send Delete_Item                        To hoID  iNr
-      End
-    End_Procedure
-
-
-
-    // Deletes all values, not the defined tags (with "AddTag").
-    // Is sent before the data is loaded.
-    Procedure DoInit
-      Integer iC iType hoID iC2 hoTmp
-      For iC From 0 To (Item_Count(oTags(Self))-1)
-        Get Value Of (oTagTypes(Self)) Item iC      To iType
-        Get Value Of (oTagValues(Self)) Item iC     To hoID
-        If iType Begin
-          For iC2 From 0 To (Item_Count(hoID)-1)
-            Get Value Of hoID Item iC2              To hoTmp
-            If hoTmp ;
-              Send Destroy_Object                     To hoTmp
-          End
-          Send Delete_Data                        To hoID
-        End
-        Else ;
-          Send Delete_Data                       To hoID
-      End
-    End_Procedure
-
-    // Adds a iniTag.
-    // The type can be multi of not. If it is a multi tag
-    // there can be more than one value with the same tag.
-    Procedure AddTag String sTag Integer iMulti
-      Integer iC hoID
-
-      Get Find_Element Of (oTags(Self)) sTag  To iC
-      If iC Lt 0 Begin
-        Object oIniTag is an Array
-          Move Self       To hoID
-        End_Object
-        Get Item_Count  Of (oTags(Self))                To iC
-        Set Value       Of (oTags(Self))        Item iC To sTag
-        Set Value       Of (oTagTypes(Self))    Item iC To iMulti
-        Set Value       Of (oTagValues(Self))   Item iC To hoID
-      End
-    End_Procedure
-
-
-    // Sets the value of a Tag (and a SubTag)
-    Procedure SetIniValue String sTag Integer iMultiNr Integer iSubTagNr String sValue
-      Integer iC iType hoID hoID2 hoDest
-
-      Get Find_Element Of (oTags(Self)) sTag              To iC
-      If iC Ge 0 Begin
-        Get Value Of (oTagTypes(Self))              Item iC         To iType
-        Get Value Of (oTagValues(Self))             Item iC         To hoID
-        Get Value Of (oTagConnectedObjects(Self))   Item iC         To hoDest
-        If iType Begin
-          If iMultiNr Lt 0 Begin
-            Move (Item_Count(hoID))    To iMultiNr // To add new values
-          End
-          Get Value Of hoID Item iMultiNr             To hoID2
-          If Not hoID2 Begin
-            Object oSubs is an Array
-              Move Self   To hoID2
+            Object oUnusedLines is an Array                 // Storage for all unused (unknown) lines.
             End_Object
-            Set Value Of hoID Item iMultiNr         To hoID2
-          End
-          Set Value Of hoID2 Item iSubTagNr           To sValue
-        End
-        Else Begin
-          If hoDest Begin
-            Set ConnectObjectValue hoDest     To sValue
-          End
-          Set Value Of hoID Item iSubTagNr            To sValue
-        End
-      End
-    End_Procedure
+            Object oLineParser is a cLineParser             // Seperates a String into his parts.
+            End_Object
+
+            Object oTags is a Set                           // Known Tags
+            End_Object
+            Object oTagTypes is an Array                    // Type of the Tags
+            End_Object
+            Object oTagValues is an Array                   // Values for the Tags.
+            End_Object
+            Object oTagConnectedObjects is an Array         // ObjectIDs of the connected Obj.
+            End_Object
+
+            Send INI_AddTagValues
+            Send onInit
+        End_Procedure
+
+        // Connects an Object to a tag.
+        Procedure ConnectObjectToTag String sTag Integer hoID
+            Integer iC
+            Move (Uppercase(sTag))  to sTag
+            Get Find_Element of (oTags(Self)) sTag  to iC
+            If iC Ge 0 Begin
+                Set Value of (oTagConnectedObjects(Self)) Item iC   to hoID
+            End
+        End_Procedure
+
+        Procedure Set ConnectObjectValue Integer hoDest String sValue
+            If hoDest Begin
+                If (checkbox_item_state(hoDest,0)) Eq 0 ;
+                    Set Value        of hoDest Item 0 to sValue
+                Else ;
+                    Set Select_State of hoDest Item 0 to sValue
+            End
+        End_Procedure
+        Function ConnectObjectValue Integer hoDest Returns String
+            String sRet
+            If hoDest Begin
+                If (checkbox_item_state(hoDest,0)) Eq 0 ;
+                    Move (Value(hoDest,0)) to sRet
+                Else ;
+                    Move (Select_State(hoDest,0)) to sRet
+            End
+            Function_Return sRet
+        End_Function
 
 
-    // Adds a value to a tag. If it is a mulit tag
-    // numerous values are possible, if not only one is stored and
-    // every call of AddTagValue for the same tag overwrites the existing
-    // value.
-    Procedure AddTagValue String sTag String sValue
-      Send SetIniValue sTag -1 0 sValue
-    End_Procedure
+
+        // Creates extended source files.
+        Function SourceFile Integer iMode Returns String
+            Integer iPos
+            String  sFile sExt
+            String  sPath
+      
+            Get psSourceFile to sFile
+            If iMode Eq Ini_User     ;
+                Get NetzwerkBenutzer to sExt
+            If iMode Eq Ini_Computer ;
+                Get ComputerName     to sExt
+
+            If (Left(Right(sFile,2),1)) Eq "." ;
+                Move 1                           to iPos
+            If (Left(Right(sFile,3),1)) Eq "." ;
+                Move 2                           to iPos
+            If (Left(Right(sFile,4),1)) Eq "." ;
+                Move 3                           to iPos
+            If iPos Gt 0 ;
+                Move (Insert(sExt,sFile,Length(sFile)-iPos))           to sFile
+      
+            // ToDo: Wouldn't it be better to use psProgrampath?
+            If (sFile<>"") Begin
+                If (sFile<>"" and pbUseDataPath(Self)) Begin
+                    Get psDataPath of (phoWorkspace(ghoApplication)) to sPath
+                End
+                Else If (pbUseProgramPath(Self)) Begin
+                    Get psProgramPath of (phoWorkspace(ghoApplication)) to sPath
+                End
+                Get vFolderFormat sPath to sPath
+                Move (sPath+sFile) to sFile
+            End
+            Function_Return sFile
+        End_Function
+
+        // Checks if a file exists.
+        Function INI_DoesFileExist String sFile Returns Integer
+            Integer iExist
+            If sFile Eq "" Begin
+                Function_Return 0
+            End
+            Direct_Input sFile
+            If (Not(seqeof)) Move 1 to iExist
+            Close_Input
+            Function_Return iExist
+        End_Function
+
+        // Tries to find the best ini file.
+        Function SourceFileForRead Returns String
+            If (INI_DoesFileExist(Self, SourceFile(Self, piLoadSaveMode(Self)) )) Begin
+                Function_Return (SourceFile(Self, piLoadSaveMode(Self)))
+            End
+            Function_Return (psSourceFile(Self))
+        End_Function
+
+        // Delivers the file for writing.
+        Function SourceFileForWrite Returns String
+            Function_Return (SourceFile(Self, piLoadSaveMode(Self)))
+        End_Function
+
+        // Deletes all items of a Tag, if it is multi!
+        Procedure DeleteAllItems String sTag
+            Integer iC iType hoID iC2 hoTmp
+            Get Find_Element of (oTags(Self)) sTag      to iC
+            Get Value of (oTagTypes(Self)) Item iC      to iType
+            Get Value of (oTagValues(Self)) Item iC     to hoID
+            If iType If hoID Begin
+                For iC2 From 0 to (Item_Count(hoID)-1)
+                    Get Value of hoID Item iC2              to hoTmp
+                    If hoTmp ;
+                        Send Destroy_Object                     to hoTmp
+                End
+                Send Delete_Data                        to hoID
+            End
+        End_Procedure
+
+        // Deletes one Item of a Tag if it is multi.
+        Procedure DeleteItem String sTag Integer iNr
+            Integer iC iType hoID hoTmp
+            Get Find_Element of (oTags(Self)) sTag      to iC
+            Get Value of (oTagTypes(Self)) Item iC      to iType
+            Get Value of (oTagValues(Self)) Item iC     to hoID
+            If iType If hoID Begin
+                Get Value of hoID Item iNr              to hoTmp
+                If hoTmp ;
+                    Send Destroy_Object            to hoTmp
+                Send Delete_Item                        to hoID  iNr
+            End
+        End_Procedure
 
 
-    // Runs a line and returns true if the tag was known and false if not.
-    // This is called during the loading procedure and if it returns false
-    // the line is stored in "oUnusedLines".
-    // Given is the whole read line and an ObjectID of an array which contains
-    // all parts of the line.
-    Function DoLine String sLine Integer hoPartsID Returns Integer
-      Integer iC iC2 iMultiItemNr hoID
-      Get Find_Element Of (oTags(Self)) (Value(hoPartsID,0))  To iC
-      Get Value Of (oTagValues(Self)) Item iC                 To hoID
-      If hoID Begin
-        Get Item_Count Of hoID                          To iMultiItemNr
-      End
-      If iC Ge 0 Begin
-        For iC2 From 1 To (Item_Count(hoPartsID)-1)
-          Send SetIniValue (Value(hoPartsID,0)) iMultiItemNr (iC2-1) (Value(hoPartsID,iC2))
-        End
-        If (Item_Count(hoPartsID)) Le 1 Begin
-          Send SetIniValue (Value(hoPartsID,0)) iMultiItemNr 1 ""
-        End
-        Function_Return 1
-      End
-      Function_Return 0
-    End_Function
 
-    // Reads the data out of the inifile.
-    Procedure LoadIni
-      String sLine
-      String sFile
-      Integer hoParser hoUnused
+        // Deletes all values, not the defined tags (with "AddTag").
+        // Is sent before the data is loaded.
+        Procedure DoInit
+            Integer iC iType hoID iC2 hoTmp
+            For iC From 0 to (Item_Count(oTags(Self))-1)
+                Get Value of (oTagTypes(Self)) Item iC      to iType
+                Get Value of (oTagValues(Self)) Item iC     to hoID
+                If iType Begin
+                    For iC2 From 0 to (Item_Count(hoID)-1)
+                        Get Value of hoID Item iC2              to hoTmp
+                        If hoTmp ;
+                            Send Destroy_Object                     to hoTmp
+                    End
+                    Send Delete_Data                        to hoID
+                End
+                Else ;
+                    Send Delete_Data                       to hoID
+            End
+        End_Procedure
 
-      Move (oUnusedLines(Self))   To hoUnused
-      Move (oLineParser(Self))    To hoParser
+        // Adds a iniTag.
+        // The type can be multi of not. If it is a multi tag
+        // there can be more than one value with the same tag.
+        Procedure AddTag String sTag Integer iMulti
+            Integer iC hoID
 
-      Send DoInit                                 // Clears all values
-      Send Delete_Data            To hoUnused     // also the unusedlines.
+            Get Find_Element of (oTags(Self)) sTag  to iC
+            If iC Lt 0 Begin
+                Object oIniTag is an Array
+                    Move Self       to hoID
+                End_Object
+                Get Item_Count  of (oTags(Self))                to iC
+                Set Value       of (oTags(Self))        Item iC to sTag
+                Set Value       of (oTagTypes(Self))    Item iC to iMulti
+                Set Value       of (oTagValues(Self))   Item iC to hoID
+            End
+        End_Procedure
 
-      Set psSepCharacter Of hoParser To (psSepCharacter(Self))
+
+        // Sets the value of a Tag (and a SubTag)
+        Procedure SetIniValue String sTag Integer iMultiNr Integer iSubTagNr String sValue
+            Integer iC iType hoID hoID2 hoDest
+
+            Get Find_Element of (oTags(Self)) sTag              to iC
+            If iC Ge 0 Begin
+                Get Value of (oTagTypes(Self))              Item iC         to iType
+                Get Value of (oTagValues(Self))             Item iC         to hoID
+                Get Value of (oTagConnectedObjects(Self))   Item iC         to hoDest
+                If iType Begin
+                    If iMultiNr Lt 0 Begin
+                        Move (Item_Count(hoID))    to iMultiNr // To add new values
+                    End
+                    Get Value of hoID Item iMultiNr             to hoID2
+                    If Not hoID2 Begin
+                        Object oSubs is an Array
+                            Move Self   to hoID2
+                        End_Object
+                        Set Value of hoID Item iMultiNr         to hoID2
+                    End
+                    Set Value of hoID2 Item iSubTagNr           to sValue
+                End
+                Else Begin
+                    If hoDest Begin
+                        Set ConnectObjectValue hoDest     to sValue
+                    End
+                    Set Value of hoID Item iSubTagNr            to sValue
+                End
+            End
+        End_Procedure
+
+
+        // Adds a value to a tag. If it is a mulit tag
+        // numerous values are possible, if not only one is stored and
+        // every call of AddTagValue for the same tag overwrites the existing
+        // value.
+        Procedure AddTagValue String sTag String sValue
+            Send SetIniValue sTag -1 0 sValue
+        End_Procedure
+
+
+        // Runs a line and returns true if the tag was known and false if not.
+        // This is called during the loading procedure and if it returns false
+        // the line is stored in "oUnusedLines".
+        // Given is the whole read line and an ObjectID of an array which contains
+        // all parts of the line.
+        Function DoLine String sLine Integer hoPartsID Returns Integer
+            Integer iC iC2 iMultiItemNr hoID
+            Get Find_Element of (oTags(Self)) (Value(hoPartsID,0))  to iC
+            Get Value of (oTagValues(Self)) Item iC                 to hoID
+            If hoID Begin
+                Get Item_Count of hoID                          to iMultiItemNr
+            End
+            If iC Ge 0 Begin
+                For iC2 From 1 to (Item_Count(hoPartsID)-1)
+                    Send SetIniValue (Value(hoPartsID,0)) iMultiItemNr (iC2-1) (Value(hoPartsID,iC2))
+                End
+                If (Item_Count(hoPartsID)) Le 1 Begin
+                    Send SetIniValue (Value(hoPartsID,0)) iMultiItemNr 1 ""
+                End
+                Function_Return 1
+            End
+            Function_Return 0
+        End_Function
+
+        // Reads the data out of the inifile.
+        Procedure LoadIni
+            String sLine
+            String sFile
+            Integer hoParser hoUnused
+
+            Move (oUnusedLines(Self))   to hoUnused
+            Move (oLineParser(Self))    to hoParser
+
+            Send DoInit                                 // Clears all values
+            Send Delete_Data            to hoUnused     // also the unusedlines.
+
+            Set psSepCharacter of hoParser to (psSepCharacter(Self))
         
-      Get SourceFileForRead To sFile
+            Get SourceFileForRead to sFile
 
-      Direct_Input sFile
-      Repeat
-        Readln sLine
-        If (Not(SeqEof)) Begin
-          Send ParseLine  To hoParser sLine
-          If (Not(DoLine(Self,sLine,hoParser))) Begin
-            Set Value Of hoUnused Item (Item_Count(hoUnused)) To sLine
-          End
-        End
-      Until (SeqEof)
-      Close_Input
-    End_Procedure
+            Direct_Input sFile
+            Repeat
+                Readln sLine
+                If (Not(SeqEof)) Begin
+                    Send ParseLine  to hoParser sLine
+                    If (Not(DoLine(Self,sLine,hoParser))) Begin
+                        Set Value of hoUnused Item (Item_Count(hoUnused)) to sLine
+                    End
+                End
+            Until (SeqEof)
+            Close_Input
+        End_Procedure
 
-    // Saves the data to the inifile.
-    Procedure SaveIni
-      Integer iC iC2 iC3 hoID iType hoUnused iCount hoID2 hoDest
-      String  sTag sSep
-      String  sFileName
-      Get psSepCharacter              To sSep
-      Get Item_Count Of (oTags(Self)) To iCount
-      Move (oUnusedLines(Self))       To hoUnused
+        // Saves the data to the inifile.
+        Procedure SaveIni
+            Integer iC iC2 iC3 hoID iType hoUnused iCount hoID2 hoDest
+            String  sTag sSep
+            String  sFileName
+            Get psSepCharacter              to sSep
+            Get Item_Count of (oTags(Self)) to iCount
+            Move (oUnusedLines(Self))       to hoUnused
 
-      Get SourceFileForWrite To sFileName
-      Direct_Output sFileName
+            Get SourceFileForWrite to sFileName
+            Direct_Output sFileName
 
-      For iC From 0 To (iCount-1)
-        Get Value Of (oTags(Self))                  Item iC To sTag
-        Get Value Of (oTagTypes(Self))              Item iC To iType
-        Get Value Of (oTagValues(Self))             Item iC To hoID
-        Get Value Of (oTagConnectedObjects(Self))   Item iC To hoDest
-        If iType Begin
-          For iC2 From 0 To (Item_Count(hoID)-1)
-            Get Value Of hoID   Item iC2        To hoID2
-            If hoID2 Begin
-              Write sTag
-              For iC3 From 0 To (Item_Count(hoID2)-1)
-                Write sSep (Value(hoID2,iC3))
-              End
-              Writeln
+            For iC From 0 to (iCount-1)
+                Get Value of (oTags(Self))                  Item iC to sTag
+                Get Value of (oTagTypes(Self))              Item iC to iType
+                Get Value of (oTagValues(Self))             Item iC to hoID
+                Get Value of (oTagConnectedObjects(Self))   Item iC to hoDest
+                If iType Begin
+                    For iC2 From 0 to (Item_Count(hoID)-1)
+                        Get Value of hoID   Item iC2        to hoID2
+                        If hoID2 Begin
+                            Write sTag
+                            For iC3 From 0 to (Item_Count(hoID2)-1)
+                                Write sSep (Value(hoID2,iC3))
+                            End
+                            Writeln
+                        End
+                        Else Begin
+                            Writeln sTag
+                        End
+                    End
+                End
+                Else Begin
+                    If hoDest Begin
+                        Set Value of hoID Item 0    to (ConnectObjectValue(Self,hoDest))
+                    End
+                    Write sTag
+                    For iC2 From 0 to (Item_Count(hoID)-1)
+                        Write sSep (Value(hoID,iC2))
+                    End
+                    Writeln
+                End
+            End
+
+            For iC From 0 to (Item_Count(hoUnused)-1)
+                Writeln (Value(hoUnused,iC))
+            End
+
+            Close_Output
+        End_Procedure
+
+
+        // Delivers the value of a given tag.
+        Function IniValueEx String sTag Integer iMultiNr Integer iSubNr Returns String
+            Integer iC iType hoID hoDest
+            String sRetVal
+            Get Find_Element of (oTags(Self)) sTag   to iC
+            Get Value of (oTagTypes(Self))  Item iC  to iType
+            Get Value of (oTagValues(Self)) Item iC  to hoID
+            Get Value of (oTagConnectedObjects(Self))   Item iC         to hoDest
+            If iType Begin
+                If iMultiNr Ge (Item_Count(hoID)) Begin
+                    Move (Item_Count(hoID)-1)  to iMultiNr
+                End  
+                If hoID ;
+                    Get Value of hoID Item iMultiNr                              to hoID
+            End
+            Else If hoDest If hoID Begin
+                Set Value of hoID Item 0 to (ConnectObjectValue(Self,hoDest))
+            End
+
+            If hoID ;
+                Move (Value(hoID,iSubNr)) to sRetVal
+            Else ;
+                Move "" to sRetVal	
+            Function_Return sRetVal
+        End_Function
+
+
+        // Delivers the value of a given tag.
+        Function IniValue String sTag Integer iNr Returns String
+            Function_Return (IniValueEx(Self,sTag,iNr,0))
+        End_Function
+
+        // Delivers the number of values of a given tag.
+        // If it isn't a multi tag 1 is returned.
+        Function IniValueCount String sTag Returns Integer
+            Integer iC iType hoID iRetval
+            Get Find_Element of (oTags(Self)) sTag  to iC
+            Get Value of (oTagTypes(Self)) Item iC  to iType
+            If iType Begin
+                Get Value of (oTagValues(Self)) Item iC to hoID
+                Move (Item_Count(hoID)) to iRetval
             End
             Else Begin
-              Writeln sTag
+                Move 1 to iRetval
             End
-          End
-        End
-        Else Begin
-          If hoDest Begin
-            Set Value Of hoID Item 0    To (ConnectObjectValue(Self,hoDest))
-          End
-          Write sTag
-          For iC2 From 0 To (Item_Count(hoID)-1)
-            Write sSep (Value(hoID,iC2))
-          End
-          Writeln
-        End
-      End
-
-      For iC From 0 To (Item_Count(hoUnused)-1)
-        Writeln (Value(hoUnused,iC))
-      End
-
-      Close_Output
-    End_Procedure
+            Function_Return iRetval
+        End_Function
+    End_Class
 
 
-    // Delivers the value of a given tag.
-    Function IniValueEx String sTag Integer iMultiNr Integer iSubNr Returns String
-      Integer iC iType hoID hoDest
-      String sRetVal
-      Get Find_Element Of (oTags(Self)) sTag   To iC
-      Get Value Of (oTagTypes(Self))  Item iC  To iType
-      Get Value Of (oTagValues(Self)) Item iC  To hoID
-      Get Value Of (oTagConnectedObjects(Self))   Item iC         To hoDest
-      If iType Begin
-        If iMultiNr Ge (Item_Count(hoID)) Begin
-	  Move (Item_Count(hoID)-1)  To iMultiNr
-	End  
-        If hoID ;
-          Get Value Of hoID Item iMultiNr                              To hoID
-      End
-      Else If hoDest If hoID Begin
-        Set Value Of hoID Item 0 To (ConnectObjectValue(Self,hoDest))
-      End
+    // Only for compatibility with earlier versions.
+    // Which I only used myself. :-)
+    Class cIniManager is a cIniProperties
+    End_Class
 
-      If hoID ;
-        Move (Value(hoID,iSubNr)) to sRetVal
-      Else ;
-        Move "" To sRetVal	
-      Function_Return sRetVal
-    End_Function
-
-
-    // Delivers the value of a given tag.
-    Function IniValue String sTag Integer iNr Returns String
-      Function_Return (IniValueEx(Self,sTag,iNr,0))
-    End_Function
-
-    // Delivers the number of values of a given tag.
-    // If it isn't a multi tag 1 is returned.
-    Function IniValueCount String sTag Returns Integer
-      Integer iC iType hoID iRetval
-      Get Find_Element Of (oTags(Self)) sTag  To iC
-      Get Value Of (oTagTypes(Self)) Item iC  To iType
-      If iType Begin
-        Get Value Of (oTagValues(Self)) Item iC To hoID
-        Move (Item_Count(hoID)) To iRetval
-      End
-      Else Begin
-        Move 1 To iRetval
-      End
-      Function_Return iRetval
-    End_Function
-  End_Class
-
-
-  // Only for compatibility with earlier versions.
-  // Which I only used myself. :-)
-  Class cIniManager is a cIniProperties
-  End_Class
-
-  // Need to put this into a seperate command becouse the orginal Procedure and
-  // Function commands require the !$ to be set to the class name of the current class
-  // Can be used as the std commands eccexpt that the 1st argument must always be the
-  // the name of the last global Property = !$
+    // Need to put this into a seperate command becouse the orginal Procedure and
+    // Function commands require the !$ to be set to the class name of the current class
+    // Can be used as the std commands eccexpt that the 1st argument must always be the
+    // the name of the last global Property = !$
 #COMMAND INI_Procedure R
     #SPOP   $$                              // Catch the ClassName from the STack
     Procedure !2 !3 !4 !5 !6 !7 !8 !9
@@ -560,14 +560,14 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
     #SET    $$ !1                           // Set Back to the name of the Last GlobalProperty!
 #ENDCOMMAND
 
-  // The top value of the Stack is the ClassName!!
-  // And every Stack Manipulation is done in a way that this is always the case!
+    // The top value of the Stack is the ClassName!!
+    // And every Stack Manipulation is done in a way that this is always the case!
 #COMMAND INI_Begin_Properties
     #IF !0>0
         Procedure onInit
-             Set psSourceFile       To !1
+             Set psSourceFile       to !1
              #IF !0>1
-                Set piLoadSaveMode  To !2
+                Set piLoadSaveMode  to !2
             #ENDIF
         End_Procedure
     #ENDIF
@@ -598,7 +598,7 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
     #SET $$ !1
 #ENDCOMMAND
 
-  // The top value of the Stack is the ClassName!!
+    // The top value of the Stack is the ClassName!!
 #COMMAND INI_End_Properties
     #SPOP $$       // ...
 //    ProcedureEx INI_AddTagValues
@@ -619,8 +619,8 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
     End_Procedure
 #ENDCOMMAND
 
-  // Saves two values to the Stack: String TagName and Numeric: MultiLine
-  // The 1st parameter need to be !$ becouse stack has to stay valid!
+    // Saves two values to the Stack: String TagName and Numeric: MultiLine
+    // The 1st parameter need to be !$ becouse stack has to stay valid!
 #COMMAND SAVE_AddTag R R R
     #SPOP   $$                              // Catch the ClassName from the STack
 
@@ -633,7 +633,7 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
 #ENDCOMMAND
 
 
-  // Defines a MultiItem Property!
+    // Defines a MultiItem Property!
 #COMMAND INI_Property.Multi             // 1-TYPE 2-Name 3-Public 4-IniT
     #SET  i$ 1                          // Multi Item!
     SAVE_AddTag !$ !2 1
@@ -656,7 +656,7 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
     #SET $$ !2                          // Saves the name of the main property!
 #ENDCOMMAND
 
-  // Defines a Single Item Propery
+    // Defines a Single Item Propery
 #COMMAND INI_Property.Single             // 1-TYPE 2-Name 3-Public 4-IniT
     #SET  i$ 0                           // Single Item!
     SAVE_AddTag !$ !2 0
@@ -670,7 +670,7 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
     #SET $$ !2                           // Saves the name of the main property!
 #ENDCOMMAND
 
-  // Defines a Ini Property whether MULTI Item or Single.
+    // Defines a Ini Property whether MULTI Item or Single.
 #COMMAND INI_Property  R R "PRIVATE""PUBLIC""" UGO  // 1-TYPE 2-Name 3-Public 4-IniT 5-MULTI
     #IFSAME !g 101010
         #IFSAME !1 String Integer Number Date
@@ -689,7 +689,7 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
     #ENDIF
 #ENDCOMMAND
 
-  // Defines a sub-property for a multi item property.
+    // Defines a sub-property for a multi item property.
 #COMMAND INI_Property.Sub.Multi     // 1-TYPE 2-Name 3-Public 4-IniT
     INI_Procedure !$ Set !$.!2 Integer iItemNr !1 sWert
         Send SetIniValue "!$" iItemNr !H sWert
@@ -699,7 +699,7 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
     INI_End_Function !$
 #ENDCOMMAND
 
-  // Defines a sub-property for a single item property.
+    // Defines a sub-property for a single item property.
 #COMMAND INI_Property.Sub.Single  // 1-TYPE 2-Name 3-Public 4-IniT
     INI_Procedure !$ Set !$.!2 !1 sWert
         Send SetIniValue "!$" 0 !h sWert
@@ -709,7 +709,7 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
     INI_End_Function !$
 #ENDCOMMAND
 
-  // Defines a subproprty neither to a multi or a single (parent) property.
+    // Defines a subproprty neither to a multi or a single (parent) property.
 #COMMAND INI_Property.Sub  R R "PRIVATE""PUBLIC""" UGO . // 1-TYPE 2-Name 3-Public 4-IniT
     #IFSAME !1 String Integer Number Date
         #IFDEF GET_!$
@@ -727,7 +727,7 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
 #ENDCOMMAND
 
 
-  // For an easier writing of the Class Import.
+    // For an easier writing of the Class Import.
 #COMMAND INI_IMPORT_PROPERTIES
     Import_Class_Protocol !1 !$ ALL INHERIT
 #ENDCOMMAND

@@ -30,8 +30,8 @@ Use THColorer.h
 Use oEditorProperties.pkg
 
 Procedure Add_Color_Element Integer iIndex String sName Integer iFront Integer iBack Integer iFont Integer iStyle Integer iCM
-    // iIndex = Element Index
-    // Name of the Element
+// iIndex = Element Index
+// Name of the Element
     Move sName  to gtColorer[iIndex].sName
     // Front Color OffSet *at the color line (if any)
     Move iFront to gtColorer[iIndex].iForeOff
@@ -266,3 +266,4 @@ Class cEditorPreview is a cRichEdit
         Send AddElement EC_METATAGS sMeta
     End_Procedure
 End_Class
+

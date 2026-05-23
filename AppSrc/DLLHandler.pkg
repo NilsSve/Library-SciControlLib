@@ -50,233 +50,232 @@ Define CS_ERRMISSINGDLLLINE2   For "\nThe program was unable to load the module:
 Define CS_ERRMISSINGDLLCAPTION For "Program Halted"
 
 Class cDllHandler is a DfObject
-  Procedure Construct_Object
-    Forward Send Construct_Object
-    Property String  psDllLoadPath                  ""    // The default library path from where Dlls will be loaded
-    Property Integer pbErrorAbort                   True  // If true and a DLL fails to load then the application is aborted when using the doLoadLibrary method
-    Property Integer pbErrorReport                  True  // If true and a DLL fails, the error is displayed to the end-user by using a stop_box
-    Property Integer piLastWindowsError             0     // Holds the Windows Error from GetLastError
+    Procedure Construct_Object
+        Forward Send Construct_Object
+        Property String  psDllLoadPath                  ""    // The default library path from where Dlls will be loaded
+        Property Integer pbErrorAbort                   True  // If true and a DLL fails to load then the application is aborted when using the doLoadLibrary method
+        Property Integer pbErrorReport                  True  // If true and a DLL fails, the error is displayed to the end-user by using a stop_box
+        Property Integer piLastWindowsError             0     // Holds the Windows Error from GetLastError
 
-    Object oModuleHandles is a Array
-    End_Object
+        Object oModuleHandles is a Array
+        End_Object
 
-    Object oModuleNames is a Set
-    End_Object
+        Object oModuleNames is a Set
+        End_Object
 
-    Send Init   // Sets the DLlLoadpath
-  End_Procedure
+        Send Init   // Sets the DLlLoadpath
+    End_Procedure
 
-  Procedure Set ModuleHandle Integer iModule Integer hModule
-    Set Value Of oModuleHandles Item iModule To hModule
-  End_Procedure
+    Procedure Set ModuleHandle Integer iModule Integer hModule
+        Set Value of oModuleHandles Item iModule to hModule
+    End_Procedure
 
-  //
-  // If sPath is "" then the programsfolder of the current workspace will be the first
-  // path which is searched
-  //
-  // Returns 0 if loading the dll was succesful
-  // Precondition:
-  //   If a path is passed in sPath, then it must always end with a "\"
-  //   You must always supply a Dllname
-  Function DllLoadLibrary String sPath String sFile Returns Integer
-    Handle  hModule 
-    Integer iModule
-    Integer iFailed iErr iFound
-    String  sModule
-    Move 0 To iFailed
-    Move 0 To hModule
-    Move (Uppercase(sFile)) To sFile
-    If sPath Eq "" Begin
-      Get psDllLoadPath To sPath
-      Get vFolderFormat sPath To sPath
-    End
-    Get vFilePathExists (sPath+sFile) To iFound
-    If (iFound <>0) Begin
-      Move (sPath+sFile+Character(0)) to sModule
-      Get Find_Element Of oModuleNames sFile To iModule
-      If iModule Ne -1 Begin
-        Get Value Item iModule To hModule
-        If hModule Eq 0 Begin
-          Move (LoadLibrary(sModule)) to hModule
-          If hModule Ne 0 Begin
-            Set Value Of oModuleHandles Item iModule To hModule
-          End
-          Else Begin
-            // An error occured during the actual unloading by windows
-            // Get extended error information, call GetLastError.
-            Move 3 To iFailed
-            Move (GetLastError()) To iErr
-            Set piLastWindowsError To iErr
-          End
+    //
+    // If sPath is "" then the programsfolder of the current workspace will be the first
+    // path which is searched
+    //
+    // Returns 0 if loading the dll was succesful
+    // Precondition:
+    //   If a path is passed in sPath, then it must always end with a "\"
+    //   You must always supply a Dllname
+    Function DllLoadLibrary String sPath String sFile Returns Integer
+        Handle  hModule 
+        Integer iModule
+        Integer iFailed iErr iFound
+        String  sModule
+        Move 0 to iFailed
+        Move 0 to hModule
+        Move (Uppercase(sFile)) to sFile
+        If sPath Eq "" Begin
+            Get psDllLoadPath to sPath
+            Get vFolderFormat sPath to sPath
         End
-      End
-      Else Begin
-        Move (LoadLibrary(sModule)) to hModule
-        If hModule Ne 0 Begin
-          Send Add_Item hModule sFile
-        End
-        Else Begin
-          // An error occured during the actual unloading by windows
-          // Get extended error information, call GetLastError.
-          Move 3 To iFailed
-          Move (GetLastError()) To iErr
-          Set piLastWindowsError To iErr
-        End
-      End
-    End
-    Else Begin
-      Move 1 To iFailed // The file was not found
-    End
-    Function_Return iFailed
-  End_Function
-
-  // Tries to load the DLL passed as sModuleName
-  // If pbErrorAbort is set the program is aborted and a message is displayed to
-  // the user.
-  // Calls DllLoadLibrary to actually load the DLL
-  //
-  // Does not return a value
-  Procedure doLoadLibrary String sModuleName
-    Integer iError bAbort bReport
-    String  sMessage sPath
-    Move 0 To iError
-    Get DllLoadLibrary "" sModuleName To iError
-    If (iError <> 0) Begin
-      Get pbErrorAbort  To bAbort
-      Get pbErrorReport To bReport
-      If (bReport) Begin
-        Get psDllLoadPath to sPath
-        Get vFolderFormat sPath to sPath
-        Move CS_ERRMISSINGDLLLINE1 To sMessage
-        Move (sMessage+CS_ERRMISSINGDLLLINE2) To sMessage
-        Move (sMessage+sPath+sModuleName+"\n\n") To sMessage
-        Send Stop_Box sMessage CS_ERRMISSINGDLLCAPTION
-      End
-      If (bAbort) Begin
-        Abort
-      End
-    End
-  End_Procedure
-
-  // Internal, do not use
-  //
-  // Precondition:
-  //  sFile must be UPPERCASEd
-  //  hModule must contain the windows module handle of the library that was mapped
-  //    into our address space
-  Procedure Add_Item Integer hModule Integer sFile
-    Integer iModule
-    Get Item_Count Of oModuleNames To iModule
-    Set Value Of oModuleNames Item iModule To sFile
-    Set ModuleHandle Item iModule To hModule
-  End_Procedure
-
-  // Clear the DLL handler
-  Procedure Delete_Data
-    Integer hModuleHandles
-    Integer hModuleNames
-    Move (oModuleHandles(Self)) To hModuleHandles
-    If hModuleHandles Ne 0 Begin
-      Send Delete_Data To hModuleHandles
-    End
-    Move (oModuleNames(Self)) To hModuleNames
-    If hModuleNames Ne 0 Begin
-      Send Delete_Data To hModuleNames
-    End
-    Forward Send Delete_Data
-  End_Procedure
-
-  // Returns the total nr of DLL files that are still loaded in memory
-  // Succesfully unloaded DLLs do not count.
-  //
-  // Precondition:
-  //  Only modules loaded by the DllLoadLibrary function count
-  Function LoadCount Returns Integer
-    Integer iModule iCount iLoaded
-    Integer hModule hModuleHandles
-    Move 0 To iLoaded
-    Move (oModuleHandles(Self)) To hModuleHandles
-    Move (Item_Count(hModuleHandles)-1) To iCount
-    For iModule From 0 To iCount
-      Get Value Of hModuleHandles Item iModule To hModule
-      If (hModule <> 0) Begin
-        Increment iLoaded
-      End
-    Loop
-    Function_Return iLoaded
-  End_Function
-
-  // Get the total nr of modules that have been loaded using the
-  Function ItemCount Returns Integer
-    Function_Return (Item_Count(oModuleNames(Self)))
-  End_Function
-
-  // VDF syntax compatibility
-  Function Item_Count Returns Integer
-    Function_Return (ItemCount(Self))
-  End_Function
-
-  // Unload a Dllfile from memory
-  //
-  // sFile is the filename which was used to Load the library using the
-  //  DllLoadLibrary function from this class.
-  //
-  // Returns the following values:
-  // (False) if unloading of the dynamic Link library was succesful
-  // 1 if the DLL was not loaded in memory by the DllLoadLibrary function
-  // 2 if the DLL was already unloaded
-  // 3 An error occured during the actual unloading by windows
-  Function DllUnloadLibrary String sFile Returns Integer
-    Integer iFailed iErr
-    Integer iModule
-    Integer hModule hModuleHandles
-    Move 0 To iFailed
-    Move (UpperCase(sFile)) To sFile
-    Get Find_Element Of oModuleNames sFile To iModule
-    If iModule Ne -1 Begin
-      Move (oModuleHandles(Self)) To hModuleHandles
-      Get Value Of hModuleHandles Item iModule To hModule
-      If hModule Ne 0 Begin
-        //   Free ee Nelson Mandela  - oh yeah oh yeah...
-        Move (FreeLibrary(hModule)) To iErr
-        If iErr Ne 0 Begin  // If the function succeeds, the return value is nonzero.
-          Set Value Of hModuleHandles Item iModule To 0
+        Get vFilePathExists (sPath+sFile) to iFound
+        If (iFound <>0) Begin
+            Move (sPath+sFile+Character(0)) to sModule
+            Get Find_Element of oModuleNames sFile to iModule
+            If iModule Ne -1 Begin
+                Get Value Item iModule to hModule
+                If hModule Eq 0 Begin
+                    Move (LoadLibrary(sModule)) to hModule
+                    If hModule Ne 0 Begin
+                        Set Value of oModuleHandles Item iModule to hModule
+                    End
+                    Else Begin
+                        // An error occured during the actual unloading by windows
+                        // Get extended error information, call GetLastError.
+                        Move 3 to iFailed
+                        Move (GetLastError()) to iErr
+                        Set piLastWindowsError to iErr
+                    End
+                End
+            End
+            Else Begin
+                Move (LoadLibrary(sModule)) to hModule
+                If hModule Ne 0 Begin
+                    Send Add_Item hModule sFile
+                End
+                Else Begin
+                    // An error occured during the actual unloading by windows
+                    // Get extended error information, call GetLastError.
+                    Move 3 to iFailed
+                    Move (GetLastError()) to iErr
+                    Set piLastWindowsError to iErr
+                End
+            End
         End
         Else Begin
-          // An error occured during the actual unloading by windows
-          // Get extended error information, call GetLastError.
-          Move 3 To iFailed
-          Move (GetLastError()) To iErr
-          Set piLastWindowsError To iErr
+            Move 1 to iFailed // The file was not found
         End
-      End
-      Else Begin
-        Move 2 To iFailed // The DLL was already unloaded
-      End
-    End
-    Else Begin
-      Move 1 To iFailed // The DLL was not loaded in memory by the DllLoadLibrary function
-    End
-    Function_Return iFailed
-  End_Function
+        Function_Return iFailed
+    End_Function
 
-  Procedure Init
-    String  sPath
+    // Tries to load the DLL passed as sModuleName
+    // If pbErrorAbort is set the program is aborted and a message is displayed to
+    // the user.
+    // Calls DllLoadLibrary to actually load the DLL
+    //
+    // Does not return a value
+    Procedure doLoadLibrary String sModuleName
+        Integer iError bAbort bReport
+        String  sMessage sPath
+        Move 0 to iError
+        Get DllLoadLibrary "" sModuleName to iError
+        If (iError <> 0) Begin
+            Get pbErrorAbort  to bAbort
+            Get pbErrorReport to bReport
+            If (bReport) Begin
+                Get psDllLoadPath to sPath
+                Get vFolderFormat sPath to sPath
+                Move CS_ERRMISSINGDLLLINE1 to sMessage
+                Move (sMessage+CS_ERRMISSINGDLLLINE2) to sMessage
+                Move (sMessage+sPath+sModuleName+"\n\n") to sMessage
+                Send Stop_Box sMessage CS_ERRMISSINGDLLCAPTION
+            End
+            If (bAbort) Begin
+                Abort
+            End
+        End
+    End_Procedure
+
+    // Internal, do not use
+    //
+    // Precondition:
+    //  sFile must be UPPERCASEd
+    //  hModule must contain the windows module handle of the library that was mapped
+    //    into our address space
+    Procedure Add_Item Integer hModule Integer sFile
+        Integer iModule
+        Get Item_Count of oModuleNames to iModule
+        Set Value of oModuleNames Item iModule to sFile
+        Set ModuleHandle Item iModule to hModule
+    End_Procedure
+
+    // Clear the DLL handler
+    Procedure Delete_Data
+        Integer hModuleHandles
+        Integer hModuleNames
+        Move (oModuleHandles(Self)) to hModuleHandles
+        If hModuleHandles Ne 0 Begin
+            Send Delete_Data to hModuleHandles
+        End
+        Move (oModuleNames(Self)) to hModuleNames
+        If hModuleNames Ne 0 Begin
+            Send Delete_Data to hModuleNames
+        End
+        Forward Send Delete_Data
+    End_Procedure
+
+    // Returns the total nr of DLL files that are still loaded in memory
+    // Succesfully unloaded DLLs do not count.
+    //
+    // Precondition:
+    //  Only modules loaded by the DllLoadLibrary function count
+    Function LoadCount Returns Integer
+        Integer iModule iCount iLoaded
+        Integer hModule hModuleHandles
+        Move 0 to iLoaded
+        Move (oModuleHandles(Self)) to hModuleHandles
+        Move (Item_Count(hModuleHandles)-1) to iCount
+        For iModule From 0 to iCount
+            Get Value of hModuleHandles Item iModule to hModule
+            If (hModule <> 0) Begin
+                Increment iLoaded
+            End
+        Loop
+        Function_Return iLoaded
+    End_Function
+
+    // Get the total nr of modules that have been loaded using the
+    Function ItemCount Returns Integer
+        Function_Return (Item_Count(oModuleNames(Self)))
+    End_Function
+
+    // VDF syntax compatibility
+    Function Item_Count Returns Integer
+        Function_Return (ItemCount(Self))
+    End_Function
+
+    // Unload a Dllfile from memory
+    //
+    // sFile is the filename which was used to Load the library using the
+    //  DllLoadLibrary function from this class.
+    //
+    // Returns the following values:
+    // (False) if unloading of the dynamic Link library was succesful
+    // 1 if the DLL was not loaded in memory by the DllLoadLibrary function
+    // 2 if the DLL was already unloaded
+    // 3 An error occured during the actual unloading by windows
+    Function DllUnloadLibrary String sFile Returns Integer
+        Integer iFailed iErr
+        Integer iModule
+        Integer hModule hModuleHandles
+        Move 0 to iFailed
+        Move (UpperCase(sFile)) to sFile
+        Get Find_Element of oModuleNames sFile to iModule
+        If iModule Ne -1 Begin
+            Move (oModuleHandles(Self)) to hModuleHandles
+            Get Value of hModuleHandles Item iModule to hModule
+            If hModule Ne 0 Begin
+                //   Free ee Nelson Mandela  - oh yeah oh yeah...
+                Move (FreeLibrary(hModule)) to iErr
+                If iErr Ne 0 Begin  // If the function succeeds, the return value is nonzero.
+                    Set Value of hModuleHandles Item iModule to 0
+                End
+                Else Begin
+                    // An error occured during the actual unloading by windows
+                    // Get extended error information, call GetLastError.
+                    Move 3 to iFailed
+                    Move (GetLastError()) to iErr
+                    Set piLastWindowsError to iErr
+                End
+            End
+            Else Begin
+                Move 2 to iFailed // The DLL was already unloaded
+            End
+        End
+        Else Begin
+            Move 1 to iFailed // The DLL was not loaded in memory by the DllLoadLibrary function
+        End
+        Function_Return iFailed
+    End_Function
+
+    Procedure Init
+        String  sPath
 
 #IFDEF ghoWorkSpace
-    If ghoWorkspace Ne 0 Begin
-      Get CurrentProgramPath Of ghoWorkspace To sPath
-    End
+        If ghoWorkspace Ne 0 Begin
+            Get CurrentProgramPath of ghoWorkspace to sPath
+        End
 #ENDIF
-    If sPath Eq "" Begin
-      Get_Current_Directory To sPath
-    End
-    Move (vFolderFormat(sPath)) To sPath
-    Set psDllLoadPath To sPath
-  End_Procedure
+        If sPath Eq "" Begin
+            Get_Current_Directory to sPath
+        End
+        Move (vFolderFormat(sPath)) to sPath
+        Set psDllLoadPath to sPath
+    End_Procedure
 
 End_Class
 
 Object oDllHandler is a cDllHandler
 End_Object
-

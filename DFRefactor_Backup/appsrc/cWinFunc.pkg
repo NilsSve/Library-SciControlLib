@@ -15,12 +15,12 @@
 Function lshift Global Integer iVal Integer iPositions Returns Integer
     Integer i
     BigInt bVal
-    For i From 1 to iPositions
-        Move (iVal * 2) to bVal
+    For i From 1 To iPositions
+        Move (iVal * 2) To bVal
         If (bVal >= 2147483648) ;
-            Move (bVal - 2147483648) to iVal
+            Move (bVal - 2147483648) To iVal
         Else ;
-            Move bVal to iVal
+            Move bVal To iVal
     Loop
     Function_Return iVal
 End_Function
@@ -34,11 +34,11 @@ Function rshiftabs Global Integer iVal Integer iPositions Returns Integer
     Number nVal
 
     If (iVal < 0) Begin
-        Move (Number(iVal) + Number(4294967296)) to nVal
-        Move (nVal / (2^iPositions)) to iVal
+        Move (Number(iVal) + Number(4294967296)) To nVal
+        Move (nVal / (2^iPositions)) To iVal
     End
     Else Begin
-        Move (iVal / (2^iPositions)) to iVal
+        Move (iVal / (2^iPositions)) To iVal
     End
     Function_Return iVal
 End_Function
@@ -87,13 +87,14 @@ Function Ptr2Str Pointer lpsDataPointer Returns String
     Integer iVoid
 
     If (lpsDataPointer <> 0) Begin
-        Move (ZeroString(1)) to sCharacter
-        Move (CopyMemory (AddressOf(sCharacter), lpsDataPointer, 1)) to iVoid
+        Move (ZeroString(1)) To sCharacter
+        Move (CopyMemory (AddressOf(sCharacter), lpsDataPointer, 1)) To iVoid
         While (Ascii (sCharacter) <> 0)
-            Move (sResult + sCharacter) to sResult
+            Move (sResult + sCharacter) To sResult
             Increment lpsDataPointer
-            Move (CopyMemory (AddressOf(sCharacter), lpsDataPointer, 1)) to iVoid
+            Move (CopyMemory (AddressOf(sCharacter), lpsDataPointer, 1)) To iVoid
         Loop
     End
     Function_Return sResult
 End_Function
+

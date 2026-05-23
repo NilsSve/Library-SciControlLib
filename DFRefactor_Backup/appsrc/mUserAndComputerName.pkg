@@ -25,16 +25,16 @@ Move "" to gsUserName
 External_Function GetComputerName "GetComputerNameA" kernel32.dll Pointer lpszName Pointer lpdwcBuffer Returns Integer
 External_Function WNetGetUser1 "WNetGetUserA" MPR.DLL Pointer lpName Pointer lpUserName Pointer lpLength Returns DWord
 
-Function ComputerName For Desktop Returns String
+Function ComputerName for Desktop Returns String
     String  sName sLength sEnv
     Integer iRetval
     
-    Move (Repeat (Character (0), 25))                    to sName
-    Move (DwordToBytes (25))                             to sLength
-    Move (GetComputerName(AddressOf(sName), AddressOf(sLength)))   to iRetval
-    Move (cstring(sName))                                to sName
-    If sName Eq "" Move "DEFAULT"                        to sName
-    Move (cstring(sname))                                to gsComputerName
+    Move (Repeat (Character (0), 25))                    To sName
+    Move (DwordToBytes (25))                             To sLength
+    Move (GetComputerName(AddressOf(sName), AddressOf(sLength)))   To iRetval
+    Move (cstring(sName))                                To sName
+    If sName Eq "" Move "DEFAULT"                        To sName
+    Move (cstring(sname))                                To gsComputerName
     Function_Return gsComputerName
 End_Function
 
@@ -42,13 +42,13 @@ Function NetzwerkBenutzer For desktop Returns String
     String sName sLength
     Integer iRetval
 
-    Move (Repeat (Character (0), 255))                   to sName
-    Move (DwordToBytes (255))                            to sLength
-    Move (WNetGetUser1 (0, AddressOf(sName), AddressOf(sLength)))   to iRetval
-    If iRetval Eq 0 Move (cstring(sName))                   to sName
-    Else Move "DEFAULT"                                     to sName
-    If sName Eq "" Move "DEFAULT"                           to sName
-    Move sName  to gsUserName
+    Move (Repeat (Character (0), 255))                   To sName
+    Move (DwordToBytes (255))                            To sLength
+    Move (WNetGetUser1 (0, AddressOf(sName), AddressOf(sLength)))   To iRetval
+    If iRetval Eq 0 Move (cstring(sName))                   To sName
+    Else Move "DEFAULT"                                     To sName
+    If sName Eq "" Move "DEFAULT"                           To sName
+    Move sName  To gsUserName
     Function_Return sName
 End_Function
 
@@ -67,9 +67,9 @@ Function DFGetUserNameEx Global Integer iFormat Returns String
     String  sDW
     Integer iRet
     
-    Move (Repeat(Character(0),1024))            to sName
-    Move (DWordToBytes(1024))                   to sDW
-    Move (GetUserNameEx(iFormat,AddressOf(sName),AddressOf(sDW)))     to iRet
+    Move (Repeat(Character(0),1024))            To sName
+    Move (DWordToBytes(1024))                   To sDW
+    Move (GetUserNameEx(iFormat,AddressOf(sName),AddressOf(sDW)))     To iRet
     Function_Return (CString(sName))
 End_Function
 
@@ -79,8 +79,8 @@ Function DFGetUserName Global Returns String
     String  sDW   
     Integer iRet
     
-    Move (Repeat(Character(0),1024))            to sName
-    Move (DWordToBytes(1024))                   to sDW
-    Move (GetUserName(AddressOf(sName),AddressOf(sDW))) to iRet
+    Move (Repeat(Character(0),1024))            To sName
+    Move (DWordToBytes(1024))                   To sDW
+    Move (GetUserName(AddressOf(sName),AddressOf(sDW))) To iRet
     Function_Return (CString(sName))
 End_Function

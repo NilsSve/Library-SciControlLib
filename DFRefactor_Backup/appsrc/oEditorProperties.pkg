@@ -18,8 +18,8 @@
 
 // The out of this class created object is stored in this global Var.
 #IFNDEF ghoEditorProperties
-Global_Variable Integer ghoEditorProperties
-Move 0 to ghoEditorProperties
+    Global_Variable Integer ghoEditorProperties
+    Move 0 to ghoEditorProperties
 #ENDIF
 
 Use cEditorProperties.pkg

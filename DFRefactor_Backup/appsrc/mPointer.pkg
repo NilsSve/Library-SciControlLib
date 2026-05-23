@@ -19,7 +19,7 @@
 
 // Implements a C++ Makro.
 Function MAKEWPARAM Global Integer iLow Integer iHi Returns Integer
-    Function_Return (iLow+(65536*iHI))
+  Function_Return (iLow+(65536*iHI))
 End_Function
 
 // Defines a Variable only if not defined.

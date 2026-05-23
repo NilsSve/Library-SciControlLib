@@ -1,12 +1,12 @@
 #IFNDEF GET_SHELLEXECUTE
 // external function call used in Procedure DoStartDocument
 External_Function ShellExecute "ShellExecuteA" shell32.dll ;
-Handle hWnd ;
-String lpOperation ;
-String lpFile ;
-String lpParameters ;
-String lpDirectory ;
-DWord iShowCmd Returns Handle
+    Handle hWnd ;
+    String lpOperation ;
+    String lpFile ;
+    String lpParameters ;
+    String lpDirectory ;
+    Dword iShowCmd Returns Handle
 #ENDIF
 
 // this will perform an operation on a file (e.g. open) with the application
@@ -15,8 +15,8 @@ DWord iShowCmd Returns Handle
 
 Procedure DoStartDocument Global String sOperation String sDocument
     Handle hInstance hWnd
-    Get Window_Handle to hWnd
-    Move (ShellExecute (hWnd, sOperation, (Trim (sDocument)), '', '', 1)) to hInstance
+    Get Window_Handle To hWnd
+    Move (ShellExecute (hWnd, sOperation, (Trim (sDocument)), '', '', 1)) To hInstance
 End_Procedure
 
 Function ParseString String sString String sSeparator Returns Integer
