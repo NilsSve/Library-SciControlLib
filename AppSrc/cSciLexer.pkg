@@ -947,14 +947,27 @@ Class cSciLexer is a DFControl // cUIObject  cObject
             (TextData[0] = C_BOM_UTF16LEc1 and TextData[1] = C_BOM_UTF16LEc2))) to bHasBom
             If (bHasBom) Begin
                 Set pbHasUtf8BOM to True
-                // ToDo: If more than one scintilla editor is in use, we need to set these uncondicionally!
                 If (pbUtf8Mode(Self)=False) Begin
                     Set pbUtf8Mode      to True
                     Set pbOemMode       to False
                     Send EditorMessage SCI_SETCODEPAGE SC_CP_UTF8
                     Send EditorMessage SCI_STYLESETCHARACTERSET STYLE_DEFAULT SC_CHARSET_ANSI
-                End 
-            End 
+                End
+            End
+            Else Begin
+                // No BOM -> an OEM/legacy file. Reset out of any leftover UTF-8 mode from a previously
+                // opened BOM file: without this the mode is STICKY (BOM switches it ON, nothing switched
+                // it back), so a no-BOM file inherits UTF-8 and its OEM high-bytes garble - e.g. a file
+                // loaded via the ModAnalyzer double-click after a BOM file had been shown, while a drag&drop
+                // from a clean OEM state looked fine. Mirrors cRefactorEngine.DetectBOMCharacter's else.
+                Set pbHasUtf8BOM to False
+                If (pbUtf8Mode(Self)=True) Begin
+                    Set pbUtf8Mode      to False
+                    Set pbOemMode       to True
+                    Send EditorMessage SCI_SETCODEPAGE 0
+                    Send EditorMessage SCI_STYLESETCHARACTERSET STYLE_DEFAULT SC_CHARSET_OEM
+                End
+            End
 
             Move 0 to TextData[SizeOfArray(TextData)]  // add a zero at the end
             Move (AddressOf(TextData)) to aTextData
