@@ -396,7 +396,16 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
         End_Function
 
         // Reads the data out of the inifile.
+        //
+        // SEAM (2026-07-26): the FILE step lives in ReadSettingsStore / WriteSettingsStore so a
+        // subclass can swap the serialization (e.g. DFRefactor's JSON settings) while every
+        // override layered on LoadIni / SaveIni (hotkeys, language registration, macros - see
+        // cEditorProperties) keeps working untouched. LoadIni / SaveIni behave exactly as before.
         Procedure LoadIni
+            Send ReadSettingsStore
+        End_Procedure
+
+        Procedure ReadSettingsStore
             String sLine
             String sFile
             Integer hoParser hoUnused
@@ -425,7 +434,12 @@ External_Function GetFocus "GetFocus" user32.dll Returns Integer
         End_Procedure
 
         // Saves the data to the inifile.
+        // See the SEAM note on LoadIni above.
         Procedure SaveIni
+            Send WriteSettingsStore
+        End_Procedure
+
+        Procedure WriteSettingsStore
             Integer iC iC2 iC3 hoID iType hoUnused iCount hoID2 hoDest
             String  sTag sSep
             String  sFileName
