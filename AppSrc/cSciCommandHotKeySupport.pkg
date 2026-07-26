@@ -559,10 +559,16 @@ Class cSciCommandHotKeys is a cObject
             Get NaturalOrderKeys Keys to Keys
             For iKey From 0 to (iCount-1)
                 Get MapVKtoString Keys[iKey] to sKey
-                If (iKey=0) ;
-                    Move sKey to sShortCut
-                Else ;
-                    Move (sShortCut * "+" * sKey) to sShortCut
+                // The capture path can leave a phantom 0 in the VK list (stored bindings
+                // like 3144|0|16|17|72 - the 0 predates the JSON settings and is ignored
+                // by dispatch). MapVKtoString maps it to "", which used to render as a
+                // doubled joiner: "Ctrl + Shift + + H" (Nils 2026-07-26). Skip empties.
+                If (sKey<>"") Begin
+                    If (sShortCut="") ;
+                        Move sKey to sShortCut
+                    Else ;
+                        Move (sShortCut * "+" * sKey) to sShortCut
+                End
             Loop
         End
         Function_Return sShortCut
