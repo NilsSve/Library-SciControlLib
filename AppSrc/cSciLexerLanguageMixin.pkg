@@ -1,4 +1,4 @@
-//TH-Header
+﻿//TH-Header
 //*****************************************************************************************
 // Copyright (c)  2017 The Kurant project
 // All rights reserved.
@@ -17,6 +17,7 @@
 //TH-RevisionStart
 //TH-RevisionEnd
 Use cSciLexer.h
+Use THColorer.pkg            // the EC_* colour-element numbers this mixin maps styles onto
 
 Class cSciLexerLanguageMixin is a Mixin
 

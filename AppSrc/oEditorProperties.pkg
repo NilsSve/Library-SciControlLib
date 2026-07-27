@@ -23,6 +23,7 @@ Move 0 to ghoEditorProperties
 #ENDIF
 
 Use cEditorProperties.pkg
+Use THColorer.pkg            // Register_Color_Elements, sent at the bottom of this file
 Object oEditorProperties is a cEditorProperties
     Move Self to ghoEditorProperties
     Set piLoadSaveMode to Ini_Global

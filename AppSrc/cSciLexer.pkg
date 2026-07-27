@@ -59,6 +59,12 @@ Use cSciLexer.h
 Use cSciCommandHotKeySupport.pkg
 Use cNormalizeCase.pkg
 Use cSciLexerLanguageMixin.pkg
+Use cSciCodelist.pkg         // Codelist_bitmap / Codelist_find_item / Codelist_value
+Use THColorer.pkg            // gtColorer[] and the EC_* element numbers
+Use oEditorProperties.pkg    // ghoEditorProperties and the settings object itself.
+                             // These three used to arrive bundled through
+                             // cSciLexerSupport.pkg; named here because this is the file
+                             // that uses them.
 Use DllHandler.pkg
 Use Tools\Find.dg
 Use Tools\Replace.dg

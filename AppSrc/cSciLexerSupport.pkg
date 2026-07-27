@@ -1,4 +1,4 @@
-//TH-Header
+﻿//TH-Header
 //*****************************************************************************************
 // Copyright (c)  2018 Your Company Name
 // All rights reserved.
@@ -45,6 +45,20 @@ Function SelectFolderWithInit Global String sTitleText String sInitDir Returns S
     Function_Return ""
 End_Function
 
-Use cSciCodelist.pkg
-Use oEditorProperties.pkg
-Use THColorer.pkg
+// The three Use lines that used to sit here - cSciCodelist, oEditorProperties and
+// THColorer - have moved to the files that actually reference their symbols. This file
+// referenced NONE of them; they were bundled at the bottom so that anything reaching
+// cSciLexer got the whole editor in one go.
+//
+// That bundling is what made this library's Use graph CYCLIC:
+//   cEditorProperties -> cSciCommandHotKeySupport -> cSciLexerSupport
+//                     -> oEditorProperties -> cEditorProperties
+// A cycle compiles, but WHICH package enters it first then fixes the compile order of
+// everything inside it. So adding a single Use line in a consuming application could
+// leave cEditorProperties compiled before the hotkey globals it calls, and every editor
+// object then died at Construct with Error 98 on SET_SHORTCUTKEYDEFINITIONS - seen from
+// one direction 2026-07-26 and from the other 2026-07-27. With the bundle gone the graph
+// is a DAG and entry order stops being load-bearing.
+//
+// Nothing is lost for existing consumers: cSciLexer.pkg now pulls all three explicitly,
+// and that is the file they enter the editor through.
