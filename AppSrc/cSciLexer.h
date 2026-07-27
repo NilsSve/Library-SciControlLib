@@ -1,9 +1,8 @@
-Use DFAllent.pkg
+﻿Use DFAllent.pkg
 Use mStrConv.pkg
 Use mPointer.pkg
 Use tWinStructs.pkg
 Use cScintilla.h
-
 
 Define CS_CR   For (Character(13))
 Define CS_CRLF For (Character(13)+Character(10))
@@ -17,13 +16,11 @@ Enum_List
   Define eTE_ANSI    for 3
 End_Enum_List
 
-
 #IFDEF IS$WIN64
 Define CMAX_DLL_NAME For SCILEXER64.DLL
 #ELSE
 Define CMAX_DLL_NAME For SCILEXER32.DLL
 #ENDIF
-
 
 Define NM_SETFOCUS              For -7
 Define NM_KILLFOCUS             For -8
@@ -56,7 +53,6 @@ External_Function DragFinish         'DragFinish'           Shell32.dll Handle h
 // CodeTip Support external Function
 External_Function CT_DestroyWindow   'DestroyWindow'        User32.dll  Handle hWnd Returns Integer
 
-
 Define RDW_INVALIDATE          For |CI$0001
 Define RDW_INTERNALPAINT       For |CI$0002
 Define RDW_ERASE               For |CI$0004
@@ -74,26 +70,10 @@ Define RDW_ERASENOW            For |CI$0200
 Define RDW_FRAME               For |CI$0400
 Define RDW_NOFRAME             For |CI$0800
 
-
 Define COLORREF For DWord
-
-
-
-//
-//
-//
-//
-
-
 
 Define LF_FACESIZE          For 32
 Define CODEMAXWNDCLASS      For "Scintilla" //"CodeSense" //"CodeMax"
-
-/////////////////////////////////////////////////////////////
-//
-// Constants
-//
-//
 
 // maximum size (TCHARs) of text to find or replace
 Define CM_MAX_FINDREPL_TEXT          For 100
@@ -118,17 +98,9 @@ Define CM_CXLEFTMARGIN               For 24
 // SVN // maximum CodeList tooltip text length
 Define CM_MAX_CODELIST_TIP			 For 128
 
-/////////////////////////////////////////////////////////////
-//
-// CMM_SETLINESTYLE style bits
-//
-//
 Define CML_OWNERDRAW      For |CI$1      // Parent window should receive CMN_DRAWLINE notifications
 Define CML_NOTIFY_DEL     For |CI$2      // Parent window should receive CMN_DELETELINE notifications
 
-
-/////////////////////////////////////////////////////////////
-//
 // Messages - CMM_xxxxxx
 // As long as they are listed then they have not yet been migrated to scintilla
 // If commented out then it means not in scintilla or it simply works so much different that I have not
@@ -235,12 +207,7 @@ Define CMM_UPDATECONTROLPOSITIONS     For ( WM_USER + 5010 )
 Define CMM_ENABLEOEMCODE              For ( WM_USER + 4300 )
 Define CMM_ISOEMCODEENABLED           For ( WM_USER + 4301 )
 
-/////////////////////////////////////////////////////////////
-//
 // Edit commands
-//
-//
-
 Define CMD_FIRST                       For 100
 Define CMD_WORDUPPERCASE               For ( CMD_FIRST + 0 )
 Define CMD_WORDTRANSPOSE               For ( CMD_FIRST + 1 )
@@ -402,12 +369,7 @@ Define CMDERR_NOTFOUND    For 4     // data not found
 Define CMDERR_EMPTYBUF    For 5     // buffer is empty
 Define CMDERR_READONLY    For 6     // buffer is read-only
 
-////////////////////////////////////////////////////////////////////////////////////////
-//
 // Language Support for CMM_SETLANGUAGE, RegisterLanguage(), and UnregisterLanguage()
-//
-//
-
 // stock languages
 Define CMLANG_CPP         For "C/C++"
 Define CMLANG_PASCAL      For "Pascal"
@@ -417,224 +379,16 @@ Define CMLANG_JAVA        For "Java"
 Define CMLANG_HTML        For "HTML"
 Define CMLANG_XML         For "XML"
 
-//// language styles
-//Define CMLS_PROCEDURAL    FOR 0
-//Define CMLS_SGML          FOR 1
-//
-//
-//TYPE CM_LANGUAGE
-//    Field CM_LANGUAGE.dwStyle                             as Dword    // One of the CMLS_ values DWORD
-//    Field CM_LANGUAGE.bIsCaseSensitive                    as Integer  // TRUE if keywords are case sensitive BOOL
-//    Field CM_LANGUAGE.pszKeywords                         as Pointer  // The keywords delimited by '\n' LPCTSTR
-//    Field CM_LANGUAGE.pszOperators                        as Pointer  // The operators delimited by '\n' LPCTSTR
-//    Field CM_LANGUAGE.pszSingleLineComments               as Pointer  // The single line comment tokens (e.g. "//") LPCTSTR
-//    Field CM_LANGUAGE.pszMultiLineComments1               as Pointer  // The multiline comment start tokens (e.g. "/*\n{\n(*") LPCTSTR
-//    Field CM_LANGUAGE.pszMultiLineComments2               as Pointer  // The multiline comment end tokens (e.g. "*/\n}\n*)") LPCTSTR
-//    Field CM_LANGUAGE.pszScopeKeywords1                   as Pointer  // The scoping start tokens (e.g. "{\nbegin") LPCTSTR
-//    Field CM_LANGUAGE.pszScopeKeywords2                   as Pointer  // The multiline comment end tokens (e.g. "}\nend") LPCTSTR
-//    Field CM_LANGUAGE.pszStringDelims                     as Pointer  // The string literal delimiters (e.g. "\"\n'") -- also includes character literals LPCTSTR
-//    Field CM_LANGUAGE.chEscape                            as Char 1   // The escape character TCHAR
-//    Field CM_LANGUAGE.chTerminator                        as Char 1   // The statement terminator char (usually ';') TCHAR
-//    Field CM_LANGUAGE.pszTagElementNames                  as Pointer  // Tag-based element names delimited by '\n' LPCTSTR
-//    Field CM_LANGUAGE.pszTagAttributeNames                as Pointer  // Tag-based attribute names delimited by '\n' LPCTSTR
-//    Field CM_LANGUAGE.pszTagEntities                      as Pointer  // Tag-based entities delimited by '\n' LPCTSTR
-//END_TYPE
-//
-//// Color settings for CMM_GETCOLORS and CMM_SETCOLORS
-////
-//// Note:  Use CLR_INVALID on background colors to specify transparent
-////        (text) or appropriate control panel setting
-//TYPE CM_COLORS
-//    Field CM_COLORS.crWindow                            as COLORREF // window background color
-//    Field CM_COLORS.crLeftMargin                        as COLORREF // left margin background color
-//    Field CM_COLORS.crBookmark                          as COLORREF // bookmark foreground color
-//    Field CM_COLORS.crBookmarkBk                        as COLORREF // bookmark background color
-//    Field CM_COLORS.crText                              as COLORREF // plain text foreground color
-//    Field CM_COLORS.crTextBk                            as COLORREF // plain text background color
-//    Field CM_COLORS.crNumber                            as COLORREF // numeric literal foreground color
-//    Field CM_COLORS.crNumberBk                          as COLORREF // numeric literal background color
-//    Field CM_COLORS.crKeyword                           as COLORREF // keyword foreground color
-//    Field CM_COLORS.crKeywordBk                         as COLORREF // keyword background color
-//    Field CM_COLORS.crOperator                          as COLORREF // operator foreground color
-//    Field CM_COLORS.crOperatorBk                        as COLORREF // operator background color
-//    Field CM_COLORS.crScopeKeyword                      as COLORREF // scope keyword foreground color
-//    Field CM_COLORS.crScopeKeywordBk                    as COLORREF // scope keyword background color
-//    Field CM_COLORS.crComment                           as COLORREF // comment foreground color
-//    Field CM_COLORS.crCommentBk                         as COLORREF // comment background color
-//    Field CM_COLORS.crString                            as COLORREF // string foreground color
-//    Field CM_COLORS.crStringBk                          as COLORREF // string background color
-//    Field CM_COLORS.crTagText                           as COLORREF // plain tag text foreground color
-//    Field CM_COLORS.crTagTextBk                         as COLORREF // plain tag text background color
-//    Field CM_COLORS.crTagEntity                         as COLORREF // tag entity foreground color
-//    Field CM_COLORS.crTagEntityBk                       as COLORREF // tag entity background color
-//    Field CM_COLORS.crTagElementName                    as COLORREF // tag element name foreground color
-//    Field CM_COLORS.crTagElementNameBk                  as COLORREF // tag element name background color
-//    Field CM_COLORS.crTagAttributeName                  as COLORREF // tag attribute name foreground color
-//    Field CM_COLORS.crTagAttributeNameBk                as COLORREF // tag attribute name background color
-//    Field CM_COLORS.crLineNumber                        as COLORREF // line number foreground color
-//    Field CM_COLORS.crLineNumberBk                      as COLORREF // line number background color
-//    Field CM_COLORS.crHDividerLines                     as COLORREF // line number separate line color
-//    Field CM_COLORS.crVDividerLines                     as COLORREF // left margin separate line color
-//    Field CM_COLORS.crHighlightedLine                   as COLORREF // highlighted line color
-//END_TYPE
-//
-//
-///////////////////////////////////////////////////////////////
-////
-//// Font style settings for CMM_GETFONTSTYLES and CMM_SETFONTSTYLES
-//// each byte value is one of the CM_FONT_XXX values listed below
-//// this declaration
-////
-//TYPE CM_FONTSTYLES
-//    Field CM_FONTSTYLES.byText                              as Char 1   // plain text font style BYTE
-//    Field CM_FONTSTYLES.byNumber                            as Char 1   // numeric literal font style BYTE
-//    Field CM_FONTSTYLES.byKeyword                           as Char 1   // keyword font style BYTE
-//    Field CM_FONTSTYLES.byOperator                          as Char 1   // operator font style BYTE
-//    Field CM_FONTSTYLES.byScopeKeyword                      as Char 1   // scope keyword font style BYTE
-//    Field CM_FONTSTYLES.byComment                           as Char 1   // comment font style BYTE
-//    Field CM_FONTSTYLES.byString                            as Char 1   // string font style BYTE
-//    Field CM_FONTSTYLES.byTagText                           as Char 1   // plain tag text font style BYTE
-//    Field CM_FONTSTYLES.byTagEntity                         as Char 1   // tag entity font style BYTE
-//    Field CM_FONTSTYLES.byTagElementName                    as Char 1   // tag element name font style BYTE
-//    Field CM_FONTSTYLES.byTagAttributeName                  as Char 1   // tag attribute name font style BYTE
-//    Field CM_FONTSTYLES.byLineNumber                        as Char 1   // line number font style BYTE
-//END_TYPE
-//
-///////////////////////////////////////////////////////////////
-////
-//// Font style options used in CM_FONTSTYLES
-////
-////
-//Define CM_FONT_NORMAL     For 0   // normal weight
-//Define CM_FONT_BOLD       For 1   // bold weight
-//Define CM_FONT_ITALIC     For 2   // normal weight, italic
-//Define CM_FONT_BOLDITALIC For 3   // bold weight, italic
-//Define CM_FONT_UNDERLINE  For 4   // normal weight, underline
-//
-///////////////////////////////////////////////////////////////
-////
 // AutoIndent options
-//
-//
 Define CM_INDENT_OFF        For  0    // auto-indent off -- new line begins at column 0
 Define CM_INDENT_SCOPE      For  1    // NOT SUPPORTED
 Define CM_INDENT_PREVLINE   For  2    // new line has identical indentation of previous line
-//
-///////////////////////////////////////////////////////////////
-////
-//// Print option flags used with CMM_PRINT
-////
-////
-//Define CM_PRINT_PROMPTDLG    For |CI$000   // display the print common dialog
-//Define CM_PRINT_DEFAULTPRN   For |CI$001   // use default printer (no print dialog displayed)
-//Define CM_PRINT_HDC          For |CI$002   // use HDC provided
-//Define CM_PRINT_RICHFONTS    For |CI$004   // use bold, italics, underline, etc. when appropriate
-//Define CM_PRINT_COLOR        For |CI$008   // print in color
-//Define CM_PRINT_PAGENUMS     For |CI$010   // print 'page # of #' at the bottom of the page
-//Define CM_PRINT_DATETIME     For |CI$020   // print date and time at top of the page
-//Define CM_PRINT_BORDERTHIN   For |CI$040   // surround text with a thin border
-//Define CM_PRINT_BORDERTHICK  For |CI$080   // surround text with a thick border
-//Define CM_PRINT_BORDERDOUBLE For |CI$100   // surround text with two thin borders
-//Define CM_PRINT_SELECTION    For |CI$200   // print the selection rather than entire edit contents
-//
-///////////////////////////////////////////////////////////////
-////
-//// Border option flags used with CMM_GETBORDERSTYLE and CMM_SETBORDERSTYLE.
-//// Note: this values may be or'd together to achieve different effects.
-////
-//Define CM_BORDER_NONE        For |CI$0  // no border
-//Define CM_BORDER_THIN        For |CI$1  // 1-pixel border
-//Define CM_BORDER_CLIENT      For |CI$2  // client edge (WS_EX_CLIENTEDGE)
-//Define CM_BORDER_STATIC      For |CI$4  // static edge (WS_EX_STATICEDGE)
-//Define CM_BORDER_MODAL       For |CI$8  // modal edge (WS_EX_DLGMODALFRAME)
-//Define CM_BORDER_CORRAL      For (CM_BORDER_MODAL Ior CM_BORDER_CLIENT)
-//
-//
-///////////////////////////////////////////////////////////////
-////
-//// Text position indicators
-////
-////
-//
-//Type CM_POSITION
-//  Field CM_POSITION.nLine                as Integer  // zero-based line number int
-//  Field CM_POSITION.nCol                 as Integer  // zero-based *buffer* column number int
-//End_Type
-//
-//// Erzeugt einen String und eine Pointer variable, wenn diese noch nicht definiert sind!
-//// Fueltt mit Line und Col und holt die Addresse in the Pointer
-//#COMMAND Local_CM_POSITION R R "LINE=" R "COL=" R
-//    DEFINE_STR_PTR !1 !2
-//    ZeroType CM_POSITION  To !1         // as a little insurance
-//    Put !4 To !1 At CM_POSITION.nLine   // Set Line
-//    Put !6 To !1 At CM_POSITION.nCol    // Set Column
-//    GetAddress Of !1 To !2
-//#ENDCOMMAND
-//
-//
-//    // Erzeugt einen String und eine Pointer variable, wenn diese noch nicht definiert sind!
-//    // Fueltt mit Line und Col und holt die Addresse in the Pointer
-//
-//TYPE CM_RANGE
-//    Field CM_RANGE.posStart             as Char CM_POSITION_SIZE    // the anchor CM_POSITION
-//    Field CM_RANGE.posEnd               as Char CM_POSITION_SIZE    // the extension (if same as anchor, selection is empty) CM_POSITION
-//    Field CM_RANGE.bColumnSel           as Integer                  // TRUE if is a column selection, FALSE if paragragh selection BOOL
-//END_TYPE
-//
-//#COMMAND Local_CM_RANGE R R "START=" R  R "END=" R R
-//    DEFINE_STR_PTR !1 !2
-//    Zerotype CM_RANGE   to !1
-//
-//    Local_CM_POSITION sPosStart psPosStart LINE= !4 COL= !5   // Create a String with the StartPosition
-//    Local_CM_POSITION sPosEnd   psPosEnd   LINE= !7 COL= !8   // Create a String with the EndPosition
-//
-//    PUT_STRING sPosStart to !1 AT CM_RANGE.posStart           // Set Start Position
-//    PUT_STRING sPosEnd   to !1 AT CM_RANGE.posEnd             // Set End Position
-//
-//    GetAddress Of !1     to !2                                // Get the Address of the created Structure
-//#ENDCOMMAND
-
-
-///////////////////////////////////////////////////////////////
-////
-//// Hot key descriptor
-////
-////
-//TYPE CM_HOTKEY
-//    Field CM_HOTKEY.byModifiers1         as Integer //Char 1   // 1st keystroke's modifiers (combination of HOTKEYF_ALT, HOTKEYF_SHIFT, HOTKEYF_CONTROL) BYTE
-//    Field CM_HOTKEY.nVirtKey1            as Integer  // 1st keystroke's virtkey (e.g. Ctrl + 'A') UINT
-//    Field CM_HOTKEY.byModifiers2         as Integer //Char 1   // 2nd keystroke's modifiers (combination of HOTKEYF_ALT, HOTKEYF_SHIFT, HOTKEYF_CONTROL) BYTE
-//    Field CM_HOTKEY.nVirtKey2            as Integer  // 2nd keystroke's virtkey (e.g. Ctrl + 'A') UINT
-//END_TYPE
-
-//
-///////////////////////////////////////////////////////////////
-////
-//// CMN_CMDFAILURE notification data passed to parent window
-////
-////
-//TYPE CM_CMDFAILUREDATA
-//    Field CM_CMDFAILUREDATA.hdr                  as Char NMHDR_SIZE // standard notification data NMHDR
-//    Field CM_CMDFAILUREDATA.wCmd                 as WORD            // CMD_XXX command that failed WORD
-//    Field CM_CMDFAILUREDATA.dwErr                as Dword           // CMDERR_XXX failure code DWORD
-//END_TYPE
-
-
-///////////////////////////////////////////////////////////////
-////
-//// CMN_KEYDOWN, CMN_KEYUP, CMN_KEYPRESS notification
-//// data passed to parent window
-////
-////
+// CMN_KEYDOWN, CMN_KEYUP, CMN_KEYPRESS notification
+// data passed to parent window
 Define CM_KEY_NOEXT      For |CI$0
 Define CM_KEY_SHIFT      For |CI$1
 Define CM_KEY_CTRL       For |CI$2
 Define CM_KEY_ALT        For |CI$4
-//TYPE CM_KEYDATA
-//    Field CM_KEYDATA.hdr                  as Char NMHDR_SIZE    // standard notification data NMHDR
-//    Field CM_KEYDATA.nKeyCode             as Integer            // virtkey if CMN_KEYUP or CMN_KEYDOWN.  Ascii code if CMN_KEYPRESS int
-//    Field CM_KEYDATA.nKeyModifier         as Integer            // bitfield of: CM_KEY_SHIFT, CM_KEY_CTRL, and/or CM_KEY_ALT int
-//END_TYPE
 
 // Just converts the ID to the name.
 Function CMKeymodifierIDToName Global Integer iModifier Returns String
@@ -648,83 +402,23 @@ Function CMKeymodifierIDToName Global Integer iModifier Returns String
   Function_Return sRet
 End_Function
 
-///////////////////////////////////////////////////////////////
-////
-//// CMN_MOUSEDOWN, CMN_MOUSEUP, CMN_MOUSEPRESS notification
-//// data passed to parent window
-////
-////
-//Define CM_BTN_LEFT      For |CI$1
-//Define CM_BTN_RIGHT     For |CI$2
-//Define CM_BTN_MIDDLE    For |CI$4
-//
-//TYPE CM_MOUSEDATA
-//    Field CM_MOUSEDATA.hdr                  as Char NMHDR_SIZE  // standard notification data NMHDR
-//    Field CM_MOUSEDATA.pt                   as Char tPOINT_SIZE // position of mouse (client coordinates) POINT
-//    Field CM_MOUSEDATA.nButton              as Integer  // bitfield of: CM_BTN_LEFT, CM_BTN_RIGHT, and/or CM_BTN_MIDDLE int
-//    Field CM_MOUSEDATA.nKeyModifier         as Integer  // bitfield of: CM_KEY_SHIFT, CM_KEY_CTRL, and/or CM_KEY_ALT int
-//END_TYPE
-//
-///////////////////////////////////////////////////////////////
-////
-//// CMN_FINDWRAPPED notification data passed to parent window
-////
-////
-//TYPE CM_FINDWRAPPEDDATA
-//    Field CM_FINDWRAPPEDDATA.hdr                  as Char NMHDR_SIZE // standard notification data NMHDR
-//    Field CM_FINDWRAPPEDDATA.wCmd                 as WORD     // the command being executed WORD
-//    Field CM_FINDWRAPPEDDATA.bForward             as Integer  // TRUE if wrapped while searching forward, FALSE if searching backward BOOL
-//END_TYPE
-
-///////////////////////////////////////////////////////////////
-////
-//// Tooltip window styles specified as return value from
-//// CMN_CODETIP notifications
-////
-//Define CM_TIPSTYLE_NONE				    For 0	// don't display a tooltip
-//Define CM_TIPSTYLE_NORMAL				  For 1	// standard tooltip window
-//Define CM_TIPSTYLE_HIGHLIGHT			for 2	// tooltip with text highlighting
-//Define CM_TIPSTYLE_FUNCHIGHLIGHT	for 3	// tooltip with function highlighting
-//Define CM_TIPSTYLE_MULTIFUNC			for 4	// highlighting for multiple functions
-
 Define C_TIPTYPE_UNDEFINED        For 0
 Define C_TIPTYPE_EXPRESSION       For 1
 Define C_TIPTYPE_FUNCTION         For 2
 Define C_TIPTYPE_PROCEDURE        For 3
-//
-//
-//// -----------------------------------------------------------------------------------------
-//// END - SVN
-//
 
-/////////////////////////////////////////////////////////////
-//
 // data passed to CMM_SETLINENUMBERING
-//
-//
 Define CM_BINARY            For 2  // not supported
 Define CM_OCTAL             For 8  // not supported
 Define CM_DECIMAL           For 10
 Define CM_HEXADECIMAL       For 16 // not supported
 
-
-/////////////////////////////////////////////////////////////
-//
 // Error codes
-//
-//
-//typedef LRESULT CME_CODE;
-
 Define CME_SUCCESS        For 1        // function or method completed successfully
 Define CME_FAILURE        For 0        // function or method did not complete because of an error
 Define CME_BADARGUMENT    For -1       // function or method did not complete because an invalid argument was passed in
 
-/////////////////////////////////////////////////////////////
-//
 // CMM_HITTEST return codes
-//
-//
-
 Define CM_NOWHERE        For 0        // Not over the CodeMax control
 Define CM_HSPLITTER      For 1        // Over the horizontal splitter bar
 Define CM_VSPLITTER      For 2        // Over the vertical splitter bar
@@ -736,12 +430,7 @@ Define CM_SIZEBOX        For 7        // Over the sizebox visible when both scro
 Define CM_LEFTMARGIN     For 8        // Over the left margin area
 
 
-/////////////////////////////////////////////////////////////
-//
 // CMM_GETCURRENTTOKEN return codes
-//
-//
-
 Define CM_TOKENTYPE_KEYWORD					For |CI$1 // 0x01
 Define CM_TOKENTYPE_OPERATOR				For |CI$2 //0x02
 Define CM_TOKENTYPE_STRING					For |CI$3 //0x03
@@ -754,13 +443,7 @@ Define CM_TOKENTYPE_TEXT					For |CI$FF //0xff
 Define CM_TOKENTYPE_LAST                    For |CI$FFFFFFFF
 Define CM_TOKENTYPE_UNKNOWN					For (CM_TOKENTYPE_LAST-1) //(DWORD)-1
 
-
-/////////////////////////////////////////////////////////////
-//
 // Exported functions
-//
-//
-
 Define SCLEX_NULL                       For 1
 Define SCLEX_PYTHON                     For 2
 Define SCLEX_CPP                        For 3
@@ -989,13 +672,11 @@ Define SCE_PROPS_ASSIGNMENT             For 3
 Define SCE_PROPS_DEFVAL                 For 4
 Define SCE_PROPS_KEY                    For 5
 
-
 //Define MARGIN_SCRIPT_FOLD_INDEX For 1 // don't use this strange code word for "code folder margin" use below constants
 Define MARGIN_STATUS       For 0  // bookmarks, breakpoints, debug line pointer
 Define MARGIN_CHANGED_LINE For 1
 Define MARGIN_LINE_NUMBERS For 2
 Define MARGIN_CODE_FOLDING For 3
-
 
 Procedure DevTest String sMethod
   //Send Info_box sMethod "DevTest"
@@ -1036,11 +717,8 @@ Function CMGetLanguageDef Global Pointer pszName Pointer pLang   Returns Integer
   Function_Return 0
 End_Function
 
-
 // Possible values for piFindWrapMode
 Define FindWrapMode_NoWrap      For 1
 Define FindWrapMode_NoWrapMsg   For 2
 Define FindWrapMode_WrapSilent  For 3
 Define FindWrapMode_WrapAsk     For 4
-
-

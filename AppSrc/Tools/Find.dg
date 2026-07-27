@@ -1,4 +1,4 @@
-Use Windows.pkg
+﻿Use Windows.pkg
 Use MessageQueueHelpers.pkg
 Use THDialog.pkg
 
@@ -167,9 +167,8 @@ Object oFindDialog is a ModalPanel
         Forward Send Activating
         #IFDEF TH_TRANSLATION
         Send Translate
-        #ENDIF
+        #ENDIF     
+        Set Icon to "DataFlex.ico"
     End_Procedure
 
-
 End_Object
-

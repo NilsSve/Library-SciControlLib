@@ -52,8 +52,7 @@
 // of the authors and should not be interpreted as representing official policies,
 // either expressed or implied, of the VDF-Guidance / Hammer Project.
 // *********************************************************************************************************
-
-
+Use cWinControl.pkg
 Use cWinFunc.pkg
 Use seq_chnl.pkg
 Use cSciLexer.h
@@ -81,7 +80,7 @@ External_Function SciFreeRGBAImage      "SciFreeRGBAImage"      SCIMAGE_DLL Poin
 
 { DesignerClass=cDTEdit }
 
-Class cSciLexer is a DFControl // cUIObject  cObject
+Class cSciLexer is a cWinControl //DFControl // cUIObject  cObject
 
     Import_Class_Protocol cSciLexerLanguageMixin
 
